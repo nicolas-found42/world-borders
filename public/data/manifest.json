@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 1,
+  "range": [
+    1776,
+    2026
+  ],
+  "snapshots": [
+    {
+      "year": 1880,
+      "file": "snapshot-1880.geojson",
+      "corrections": [],
+      "inputs": [
+        {
+          "url": "https://raw.githubusercontent.com/aourednik/historical-basemaps/master/geojson/world_1880.geojson",
+          "sha256": "4751e30d881d60d31479f5d016ff4d9c1df47e9bb18efaa3a5086601f68f76dc"
+        },
+        {
+          "url": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/territorial_evolution_en/MapServer/8/query?where=START_TIME%3D1880&outFields=PROV_NAME,START_TIME,Period_Group&outSR=4326&maxAllowableOffset=0.03&f=geojson",
+          "sha256": "5f4b5805166eaa8198c325ff8301881a891f40fe66b88b79a889b0bf4a8cdd5c"
+        }
+      ],
+      "coverage": "snapshot-year-only"
+    },
+    {
+      "year": 1938,
+      "file": "snapshot-1938.geojson",
+      "corrections": [],
+      "inputs": [
+        {
+          "url": "https://raw.githubusercontent.com/aourednik/historical-basemaps/master/geojson/world_1938.geojson",
+          "sha256": "f2565926fed1b197227b7fe126934a43ed75b8fce007e38be72a7d21a415d813"
+        }
+      ],
+      "coverage": "snapshot-year-only"
+    },
+    {
+      "year": 1960,
+      "file": "snapshot-1960.geojson",
+      "corrections": [],
+      "inputs": [
+        {
+          "url": "https://raw.githubusercontent.com/aourednik/historical-basemaps/master/geojson/world_1960.geojson",
+          "sha256": "6067386755f8fc120a4fca44f198952a18da89cd062aa8013d5a0d08cbad8988"
+        }
+      ],
+      "coverage": "snapshot-year-only"
+    },
+    {
+      "year": 2010,
+      "file": "snapshot-2010.geojson",
+      "corrections": [],
+      "inputs": [
+        {
+          "url": "https://raw.githubusercontent.com/aourednik/historical-basemaps/master/geojson/world_2010.geojson",
+          "sha256": "d18dcbe41df5e68ec174e5f3887578142bf70fba72f56e204c9de5a8571ae0f4"
+        }
+      ],
+      "coverage": "snapshot-year-only"
+    }
+  ],
+  "sources": [
+    {
+      "id": "historical-basemaps",
+      "name": "Historical Basemaps",
+      "author": "André Ourednik and contributors",
+      "license": "GPL-3.0",
+      "url": "https://github.com/aourednik/historical-basemaps",
+      "note": "World-scale source snapshots. Geometry is generalized; precise local boundaries and effective control have not been independently verified."
+    },
+    {
+      "id": "nrcan",
+      "name": "Territorial Evolution of Canada",
+      "author": "Natural Resources Canada",
+      "license": "Open Government Licence – Canada",
+      "url": "https://open.canada.ca/data/dataset/e88ce995-b69a-4595-a752-bb06b061b5a3",
+      "note": "1880 Canadian and Newfoundland polygons from the official service. Provincial divisions dissolved; service simplifies geometry at 0.03 degrees."
+    },
+    {
+      "id": "natural-earth",
+      "name": "Natural Earth",
+      "author": "Natural Earth contributors",
+      "license": "Public domain",
+      "url": "https://www.naturalearthdata.com/about/terms-of-use/",
+      "note": "Modern physical land context only. Neutral land carries no historical sovereignty assignment."
+    },
+    {
+      "id": "hawaii-check",
+      "name": "Hawaiian annexation resolution (1898)",
+      "author": "US National Archives",
+      "license": "US government document",
+      "url": "https://www.archives.gov/milestone-documents/joint-resolution-for-annexing-the-hawaiian-islands",
+      "note": "Independent check that Hawaiian islands are outside the US in 1880 and within it in 1938. Not a source for island geometry."
+    },
+    {
+      "id": "newfoundland-check",
+      "name": "Newfoundland’s entry into Confederation (1949)",
+      "author": "Parks Canada",
+      "license": "Linked reference only",
+      "url": "https://parks.canada.ca/culture/designation/evenement-event/terre-neuve-confederation-newfoundland",
+      "note": "Independent check that Newfoundland is separate from Canada in 1880 and 1938, and part of Canada in 1960 and 2010."
+    }
+  ],
+  "landInput": {
+    "url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_land.geojson",
+    "sha256": "9e0729ee253ca7d7a5c4ae9395fb1902264c5377c52e224d13dd85010e2835d9"
+  },
+  "excludedSnapshots": [
+    {
+      "years": [
+        1783,
+        1800,
+        1815
+      ],
+      "reason": "Containment checks put Jacksonville, Florida within the United States before the 1821 transfer. No repaired historical geometry available.",
+      "evidence": "https://history.state.gov/milestones/1801-1829/florida"
+    },
+    {
+      "years": [
+        1815,
+        1900
+      ],
+      "reason": "Containment checks put Newfoundland within Canada before its 1949 entry. No verified same-year replacement available.",
+      "evidence": "https://parks.canada.ca/culture/designation/evenement-event/terre-neuve-confederation-newfoundland"
+    }
+  ],
+  "limitations": [
+    "Four snapshot years, not continuous historical coverage. Other years deliberately have no territorial polygons.",
+    "Only the 1880 Canada/Newfoundland geometry is drawn from a government historical polygon service. Other historical shapes are generalized source references, not fully vetted boundaries.",
+    "Early colonial claims are not effective control. Indigenous territories are not yet mapped; neutral areas do not imply uninhabited or unclaimed land.",
+    "A complete disputed-boundary layer is not yet available. No disputed areas are invented.",
+    "Nearby island and predecessor coverage is incomplete. Overseas dependencies are outside this pilot."
+  ]
+}

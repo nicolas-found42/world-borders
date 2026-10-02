@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.data-cache/
+artifacts/
+.jev-browser/
+test-results/
+playwright-report/
+*.log
+*.tsbuildinfo
