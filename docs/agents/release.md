@@ -28,7 +28,10 @@ New threads, replies, submitted reviews, and edited review comments since the ea
 inspection fail the command even after merge.
 Inspect and disposition them, then save a new observation as the previous baseline
 and repeat. Completion also requires the deployed SHA to match the checked current
-main, an integrated merge and closed completed issues. The JSON retains full evidence;
+main, an integrated merge and closed completed issues. The prior observation must
+match the PR and head; completion uses its saved merge requirements, retaining the
+current policy separately. Adding a future gate does not invalidate an earlier
+verified merge. The JSON retains full evidence;
 the terminal prints a compact result. Preserve the JSON with release evidence and link
 reviewer-accessible GitHub runs and review dispositions in the issue/PR.
 

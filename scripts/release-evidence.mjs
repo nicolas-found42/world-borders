@@ -14,7 +14,11 @@ export function releaseProblems(evidence, { phase, reviewedHead, reviewNote }) {
   if (pr.reviewThreads.nodes.some((t) => !t.isResolved)) problems.push('Unresolved review threads');
   if (pr.reviewDecision === 'CHANGES_REQUESTED') problems.push('Changes requested');
   const checks = evidence.prChecks || [];
-  const required = new Set(evidence.requiredChecks);
+  const required = new Set(
+    phase === 'complete'
+      ? evidence.requiredChecksAtMerge || evidence.requiredChecks
+      : evidence.requiredChecks,
+  );
   for (const check of checks) {
     const name = check.name;
     if (required.has(name) && check.bucket !== 'pass')
@@ -219,19 +223,29 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     );
   const evidence = await collect(number);
   evidence.reviewConfirmation = { head: values['reviewed-head'], note: values['review-note'] };
+  if (values.previous) {
+    const previous = JSON.parse(await readFile(values.previous, 'utf8'));
+    if (
+      previous.repository !== evidence.repository ||
+      previous.pr.headRefOid !== evidence.pr.headRefOid ||
+      previous.pr.url !== evidence.pr.url
+    )
+      throw new Error('Previous evidence must belong to the same PR and reviewed head');
+    evidence.requiredChecksAtMerge = previous.requiredChecksAtMerge || previous.requiredChecks;
+    evidence.newReviewActivity = newReviewActivity(evidence, previous);
+  }
   evidence.problems = releaseProblems(evidence, {
     phase: values.phase,
     reviewedHead: values['reviewed-head'],
     reviewNote: values['review-note'],
   });
-  if (values.previous) {
-    const previous = JSON.parse(await readFile(values.previous, 'utf8'));
-    evidence.newReviewActivity = newReviewActivity(evidence, previous);
-    if (Object.values(evidence.newReviewActivity).some((items) => items.length))
-      evidence.problems.push(
-        'New or edited review activity since previous inspection; disposition and repeat inspection required',
-      );
-  }
+  if (
+    evidence.newReviewActivity &&
+    Object.values(evidence.newReviewActivity).some((items) => items.length)
+  )
+    evidence.problems.push(
+      'New or edited review activity since previous inspection; disposition and repeat inspection required',
+    );
   const output = values.output || `artifacts/release-evidence/pr-${number}-${values.phase}.json`;
   const { dirname } = await import('node:path');
   await mkdir(dirname(output), { recursive: true });

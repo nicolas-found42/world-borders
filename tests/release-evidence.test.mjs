@@ -136,3 +136,18 @@ test('late replies and edited comments in an existing resolved thread require an
   assert.equal(activity.threads.length, 0);
   assert.deepEqual(newReviewActivity(current, current), { comments: [], reviews: [], threads: [] });
 });
+
+test('completion preserves checks required at merge while premerge enforces current policy', () => {
+  const e = fixture();
+  e.pr.state = 'MERGED';
+  e.pr.mergeCommit = { oid: 'merged' };
+  e.requiredChecks = ['verify', 'metadata'];
+  e.requiredChecksAtMerge = ['verify'];
+  assert.deepEqual(releaseProblems(e, { ...options, phase: 'complete' }), []);
+  assert.match(releaseProblems(e, options).join(), /Missing required checks: metadata/);
+  e.prChecks[0].bucket = 'fail';
+  assert.match(
+    releaseProblems(e, { ...options, phase: 'complete' }).join(),
+    /Required check did not pass: verify/,
+  );
+});
