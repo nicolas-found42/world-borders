@@ -1,34 +1,34 @@
-import { mkdir, readFile, writeFile, rm } from 'node:fs/promises';
-import { createHash } from 'node:crypto';
+import { mkdir, writeFile, rm } from 'node:fs/promises';
+import { parseArgs } from 'node:util';
+import { join } from 'node:path';
+import { fetchSource } from './source-cache.mjs';
 import { union } from '@turf/union';
 import { featureCollection } from '@turf/helpers';
 
-// Source files are cached verbatim. The published bundle contains only the
-// pilot regions and records the exact input hashes in its manifest.
-await mkdir('.data-cache', { recursive: true });
-await mkdir('public/data', { recursive: true });
+const { values } = parseArgs({
+  options: {
+    refresh: { type: 'boolean', default: false },
+    'cache-dir': { type: 'string', default: '.data-cache' },
+    'output-dir': { type: 'string', default: 'public/data' },
+  },
+});
+const outputDir = values['output-dir'];
+await mkdir(outputDir, { recursive: true });
 const historicalRoot = 'https://raw.githubusercontent.com/aourednik/historical-basemaps/master';
 const canadaRoot =
   'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/territorial_evolution_en/MapServer/8';
-async function cached(name, url) {
-  let raw;
-  try {
-    raw = await readFile(`.data-cache/${name}`, 'utf8');
-  } catch {
-    const response = await fetch(url);
-    if (!response.ok) throw new Error(`${response.status}: ${url}`);
-    raw = await response.text();
-    await writeFile(`.data-cache/${name}`, raw);
-  }
-  return { data: JSON.parse(raw), hash: createHash('sha256').update(raw).digest('hex'), url };
-}
+const cached = (name, url) =>
+  fetchSource(name, url, {
+    directory: values['cache-dir'],
+    refresh: values.refresh,
+  });
 
 const snapshots = [];
 // Earlier candidates and 1900 failed ownership checks against primary sources.
 // Small coverage is preferable to knowingly displaying an incorrect state.
 const years = [1880, 1938, 1960, 2010];
 for (const year of [1783, 1800, 1815, 1900])
-  await rm(`public/data/snapshot-${year}.geojson`, { force: true });
+  await rm(join(outputDir, `snapshot-${year}.geojson`), { force: true });
 const corrections = {};
 function polygons(geometry) {
   return geometry.type === 'Polygon' ? [geometry.coordinates] : geometry.coordinates;
@@ -130,7 +130,7 @@ for (const year of years) {
   if (!features.some((f) => f.properties.id === 'usa'))
     throw new Error(`United States absent at ${year}`);
   const file = `snapshot-${year}.geojson`;
-  await writeFile(`public/data/${file}`, JSON.stringify({ type: 'FeatureCollection', features }));
+  await writeFile(join(outputDir, file), JSON.stringify({ type: 'FeatureCollection', features }));
   snapshots.push({
     year,
     file,
@@ -144,7 +144,7 @@ const land = await cached(
   'land.geojson',
   'https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_land.geojson',
 );
-await writeFile('public/data/land.geojson', JSON.stringify(land.data));
+await writeFile(join(outputDir, 'land.geojson'), JSON.stringify(land.data));
 const sources = [
   {
     id: 'historical-basemaps',
@@ -188,7 +188,7 @@ const sources = [
   },
 ];
 await writeFile(
-  'public/data/manifest.json',
+  join(outputDir, 'manifest.json'),
   JSON.stringify(
     {
       schemaVersion: 1,

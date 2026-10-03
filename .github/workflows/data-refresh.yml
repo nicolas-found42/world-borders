@@ -1,0 +1,58 @@
+name: Geographic source review
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 10 1 * *'
+permissions:
+  contents: read
+concurrency:
+  group: geographic-source-review
+  cancel-in-progress: false
+jobs:
+  refresh:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - run: npm ci
+      - name: Fetch fresh inputs and prove replay
+        run: |
+          mkdir -p artifacts
+          cp -R public/data artifacts/data-before
+          npm run data:build -- --refresh
+          npm run data:build -- --output-dir artifacts/data-replay
+          node scripts/data-repeatability.mjs public/data artifacts/data-replay
+      - name: Record hashes, provenance, licensing and coverage
+        run: node scripts/data-report.mjs artifacts/data-before public/data
+      - run: npm run check
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - name: Capture before and after maps
+        run: node scripts/data-maps.mjs artifacts/data-before public/data
+      - name: Advisory source and claim review
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        run: node scripts/jev-data-review.mjs
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: ${{ !cancelled() }}
+        id: evidence
+        with:
+          name: data-review
+          path: |
+            artifacts/data-review/
+            playwright-report/
+            test-results/
+          retention-days: 30
+      - name: Propose changed data for review
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVIDENCE_URL: ${{ steps.evidence.outputs.artifact-url }}
+        run: node scripts/propose-data-refresh.mjs
