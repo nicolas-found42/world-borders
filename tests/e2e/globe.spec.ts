@@ -38,7 +38,9 @@ test('@smoke prefixed app loads all snapshots, assets and build revision', async
   }
   const info = await request.get(new URL('build-info.json', baseURL).href);
   expect(info.ok()).toBe(true);
-  expect((await info.json()).commit).toMatch(/^[a-f0-9]{40}$/);
+  expect((await info.json()).commit).toMatch(
+    process.env.SITE_URL ? /^[a-f0-9]{40}$/ : /^(?:[a-f0-9]{40}|unknown)$/,
+  );
   const icon = await page.locator('link[rel="icon"]').getAttribute('href');
   expect((await request.get(new URL(icon!, page.url()).href)).ok()).toBe(true);
 });

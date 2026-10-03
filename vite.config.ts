@@ -3,8 +3,17 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
 const base = process.env.APP_BASE_PATH || '/world-borders/';
-const commit =
-  process.env.GITHUB_SHA || execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+let commit = process.env.GITHUB_SHA;
+if (!commit) {
+  try {
+    commit = execFileSync('git', ['rev-parse', 'HEAD'], {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim();
+  } catch {
+    commit = 'unknown'; // Source archives still work; production smoke requires an exact SHA.
+  }
+}
 export default defineConfig({
   base,
   plugins: [
