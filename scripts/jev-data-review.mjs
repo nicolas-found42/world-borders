@@ -1,3 +1,4 @@
+import { sourceText } from './source-text.mjs';
 import { TypeSafeClient } from '@typesafe-ai/sdk';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
@@ -78,11 +79,7 @@ async function run(output) {
         const response = await fetch(url, { signal: AbortSignal.timeout(30000) });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const raw = await response.text();
-        const text = raw
-          .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '')
-          .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, '')
-          .replace(/<[^>]+>/g, ' ')
-          .replace(/\s+/g, ' ');
+        const text = sourceText(raw, response.headers.get('content-type') || '');
         return {
           url,
           sha256: createHash('sha256').update(raw).digest('hex'),
