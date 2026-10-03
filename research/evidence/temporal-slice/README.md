@@ -4,4 +4,4 @@ The matched `before-1949.png` / `after-1949.png` captures use the same applicati
 
 `retained-1938.png` shows the baseline ownership state in the new viewer. All original four snapshot GeoJSON files remain byte-identical. The desktop source panel and 390 × 844 mobile captures show the actual ready 1949 state, coverage/precision, and curator details.
 
-The release checks cover 39 deterministic cases, 11 Chromium browser cases, cached byte-for-byte rebuild, and the 660,000-byte compressed JavaScript budget. CI and deployed revision evidence are linked from the delivery PR. Source inspection and curator scope are recorded in `research/HISTORICAL_SLICE_RESEARCH.md`, the Jev ledgers, and `data/curation/canada-1949.json`.
+The release checks cover 40 deterministic cases, 11 Chromium browser cases, cached byte-for-byte rebuild, and the 660,000-byte compressed JavaScript budget. CI and deployed revision evidence are linked from the delivery PR. Source inspection and curator scope are recorded in `research/HISTORICAL_SLICE_RESEARCH.md`, the Jev ledgers, and `data/curation/canada-1949.json`.

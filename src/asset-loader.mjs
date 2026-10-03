@@ -1,9 +1,12 @@
 import { validateManifest, validateGeometry, validateStateGeometry } from './boundary-contract.mjs';
-export async function verifyAssetDigest(manifest, file, data) {
+async function jsonDigest(data) {
   const bytes = new TextEncoder().encode(JSON.stringify(data));
   const digest = await globalThis.crypto.subtle.digest('SHA-256', bytes);
   const hex = [...new Uint8Array(digest)].map((n) => n.toString(16).padStart(2, '0')).join('');
-  if (manifest.assetDigests?.[file] !== hex)
+  return hex;
+}
+export async function verifyAssetDigest(manifest, file, data) {
+  if (manifest.assetDigests?.[file] !== (await jsonDigest(data)))
     throw new Error(`Invalid boundary data: asset digest mismatch for ${file}`);
 }
 const checkAbort = (signal) => {
@@ -27,6 +30,10 @@ export function createAssetLoader({ fetcher = globalThis.fetch, urlFor = (path) 
       ]);
       checkAbort(signal);
       validateManifest(manifest);
+      const content = { ...manifest };
+      delete content.revision;
+      if (manifest.revision !== (await jsonDigest(content)))
+        throw new Error('Invalid boundary data: manifest revision mismatch');
       validateGeometry(land);
       await verifyAssetDigest(manifest, 'land.geojson', land);
       checkAbort(signal);
@@ -50,6 +57,8 @@ export function createAssetLoader({ fetcher = globalThis.fetch, urlFor = (path) 
             checkAbort(signal);
             cache.set(key, data);
           }
+          // Recheck a cache hit against the current manifest, including a stale/malformed revision.
+          await verifyAssetDigest(manifest, file, data);
           checkAbort(signal);
           return validateStateGeometry(
             data,

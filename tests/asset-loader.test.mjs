@@ -86,9 +86,28 @@ test('changed output changes the revision and stale geometry fails the digest ch
     },
   });
   await loader.loadStates(manifest, states);
+  await assert.rejects(
+    loader.loadStates({ ...changed, revision: manifest.revision }, states),
+    /digest mismatch/,
+  );
   await assert.rejects(loader.loadStates(changed, states), /digest mismatch/);
   supplied = altered;
   const loaded = await loader.loadStates(changed, states);
   assert.deepEqual(loaded[0].geometry, altered.features[0].geometry);
   assert.equal(calls, 3);
+});
+
+test('boot rejects a manifest whose contents do not match its declared revision', async () => {
+  const land = JSON.parse(await readFile(new URL('../public/data/land.geojson', import.meta.url)));
+  let supplied = manifest;
+  const loader = createAssetLoader({
+    fetcher: async (path) => ({
+      ok: true,
+      json: async () => (path.endsWith('manifest.json') ? supplied : land),
+    }),
+  });
+  assert.equal((await loader.boot()).manifest.revision, manifest.revision);
+  supplied = structuredClone(manifest);
+  supplied.limitations.push('Changed without a new revision');
+  await assert.rejects(loader.boot(), /manifest revision mismatch/);
 });
