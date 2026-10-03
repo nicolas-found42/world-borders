@@ -1,7 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { validateClosingIssues, isDependencyBot } from '../scripts/pr-metadata.mjs';
-import { releaseProblems, newReviewActivity } from '../scripts/release-evidence.mjs';
+import {
+  releaseProblems,
+  newReviewActivity,
+  applyPreviousObservation,
+} from '../scripts/release-evidence.mjs';
 const repo = 'nicolas-found42/world-borders';
 const ref = (number) => ({ number, repository: { nameWithOwner: repo } });
 
@@ -135,4 +139,127 @@ test('late replies and edited comments in an existing resolved thread require an
   assert.equal(activity.reviews.length, 2);
   assert.equal(activity.threads.length, 0);
   assert.deepEqual(newReviewActivity(current, current), { comments: [], reviews: [], threads: [] });
+});
+
+test('completion preserves checks required at merge while premerge enforces current policy', () => {
+  const e = fixture();
+  e.pr.state = 'MERGED';
+  e.pr.mergeCommit = { oid: 'merged' };
+  e.requiredChecks = ['verify', 'metadata'];
+  e.requiredChecksAtMerge = ['verify'];
+  assert.deepEqual(releaseProblems(e, { ...options, phase: 'complete' }), []);
+  assert.match(releaseProblems(e, options).join(), /Missing required checks: metadata/);
+  e.prChecks[0].bucket = 'fail';
+  assert.match(
+    releaseProblems(e, { ...options, phase: 'complete' }).join(),
+    /Required check did not pass: verify/,
+  );
+});
+
+test('completion CLI requires the prior observation before contacting GitHub', async () => {
+  const { spawnSync } = await import('node:child_process');
+  const result = spawnSync(
+    process.execPath,
+    ['scripts/release-evidence.mjs', '14', '--phase', 'complete'],
+    { encoding: 'utf8' },
+  );
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /Completion requires --previous/);
+});
+
+test('a second premerge inspection records current policy rather than older gates', () => {
+  const previous = { ...fixture(), phase: 'premerge', problems: [], requiredChecks: ['verify'] };
+  const current = { ...fixture(), requiredChecks: ['verify', 'metadata'] };
+  current.requiredChecksAtMerge = current.requiredChecks;
+  applyPreviousObservation(current, previous, 'premerge');
+  assert.deepEqual(current.requiredChecksAtMerge, ['verify', 'metadata']);
+  assert.match(releaseProblems(current, options).join(), /Missing required checks: metadata/);
+  current.phase = 'premerge';
+  current.problems = ['Missing required checks: metadata'];
+  assert.throws(
+    () => applyPreviousObservation(fixture(), current, 'complete'),
+    /successful premerge/,
+  );
+});
+
+test('only a successful premerge baseline can initialize historical requirements', () => {
+  const previous = {
+    ...fixture(),
+    phase: 'premerge',
+    problems: ['failed'],
+    requiredChecks: ['verify'],
+  };
+  assert.throws(
+    () => applyPreviousObservation(fixture(), previous, 'complete'),
+    /successful premerge/,
+  );
+  previous.problems = [];
+  const current = fixture();
+  applyPreviousObservation(current, previous, 'complete');
+  assert.deepEqual(current.requiredChecksAtMerge, ['verify']);
+  current.phase = 'complete';
+  current.problems = ['late review requires disposition'];
+  const continuation = fixture();
+  applyPreviousObservation(continuation, current, 'complete');
+  assert.deepEqual(continuation.requiredChecksAtMerge, ['verify']);
+  previous.requiredChecks = null;
+  assert.throws(
+    () => applyPreviousObservation(fixture(), previous, 'complete'),
+    /valid merge-check/,
+  );
+});
+
+test('a late-review completion cannot be silently used as the next baseline', () => {
+  const previous = {
+    ...fixture(),
+    phase: 'complete',
+    mergeRequirementsVerified: true,
+    requiredChecksAtMerge: ['verify'],
+    problems: ['late review'],
+    newReviewActivity: { comments: [{ id: 'reply' }], reviews: [], threads: [] },
+  };
+  assert.throws(
+    () => applyPreviousObservation(fixture(), previous, 'complete'),
+    /review-activity-disposition/,
+  );
+  assert.throws(
+    () => applyPreviousObservation(fixture(), previous, 'premerge'),
+    /review-activity-disposition/,
+  );
+  const current = fixture();
+  applyPreviousObservation(
+    current,
+    previous,
+    'complete',
+    'Inspected reply: addressed in the merged regression; thread resolved.',
+  );
+  assert.equal(current.reviewActivityDispositions[0].activity.comments[0].id, 'reply');
+  assert.match(current.reviewActivityDispositions[0].note, /merged regression/);
+});
+
+test('dispositions remain in final evidence through transient failures and subsequent activity', () => {
+  const previous = {
+    ...fixture(),
+    phase: 'complete',
+    mergeRequirementsVerified: true,
+    requiredChecksAtMerge: ['verify'],
+    reviewActivityDispositions: [
+      { note: 'Earlier repair', activity: { comments: [{ id: 'old' }] } },
+    ],
+  };
+  const current = fixture();
+  applyPreviousObservation(current, previous, 'complete');
+  assert.deepEqual(current.reviewActivityDispositions, previous.reviewActivityDispositions);
+  current.phase = 'complete';
+  current.problems = ['deployment still pending'];
+  current.newReviewActivity = { comments: [{ id: 'new' }], reviews: [], threads: [] };
+  const later = fixture();
+  applyPreviousObservation(later, current, 'complete', 'New reply inspected and repaired');
+  assert.equal(later.reviewActivityDispositions.length, 2);
+  assert.equal(later.reviewActivityDispositions[0].note, 'Earlier repair');
+  assert.equal(later.reviewActivityDispositions[1].activity.comments[0].id, 'new');
+  later.phase = 'complete';
+  const final = fixture();
+  applyPreviousObservation(final, later, 'complete');
+  assert.deepEqual(final.reviewActivityDispositions, later.reviewActivityDispositions);
 });

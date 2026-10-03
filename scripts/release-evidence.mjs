@@ -14,7 +14,11 @@ export function releaseProblems(evidence, { phase, reviewedHead, reviewNote }) {
   if (pr.reviewThreads.nodes.some((t) => !t.isResolved)) problems.push('Unresolved review threads');
   if (pr.reviewDecision === 'CHANGES_REQUESTED') problems.push('Changes requested');
   const checks = evidence.prChecks || [];
-  const required = new Set(evidence.requiredChecks);
+  const required = new Set(
+    phase === 'complete'
+      ? evidence.requiredChecksAtMerge || evidence.requiredChecks
+      : evidence.requiredChecks,
+  );
   for (const check of checks) {
     const name = check.name;
     if (required.has(name) && check.bucket !== 'pass')
@@ -62,6 +66,47 @@ export function releaseProblems(evidence, { phase, reviewedHead, reviewNote }) {
       problems.push('Declared completed issues are not closed as completed');
   }
   return problems;
+}
+export function applyPreviousObservation(evidence, previous, phase, disposition) {
+  if (
+    previous.repository !== evidence.repository ||
+    previous.pr.headRefOid !== evidence.pr.headRefOid ||
+    previous.pr.url !== evidence.pr.url
+  )
+    throw new Error('Previous evidence must belong to the same PR and reviewed head');
+  if (phase === 'complete') {
+    const initial =
+      previous.phase === 'premerge' &&
+      Array.isArray(previous.problems) &&
+      previous.problems.length === 0;
+    const continued = previous.phase === 'complete' && previous.mergeRequirementsVerified === true;
+    if (!initial && !continued)
+      throw new Error(
+        'Completion requires a successful premerge observation or its completion continuation',
+      );
+    const savedChecks = initial ? previous.requiredChecks : previous.requiredChecksAtMerge;
+    if (
+      !Array.isArray(savedChecks) ||
+      savedChecks.some((name) => typeof name !== 'string' || !name)
+    )
+      throw new Error('Previous evidence lacks a valid merge-check snapshot');
+    evidence.requiredChecksAtMerge = savedChecks;
+    evidence.mergeRequirementsVerified = true;
+  }
+  evidence.reviewActivityDispositions = [...(previous.reviewActivityDispositions || [])];
+  const activity = previous.newReviewActivity;
+  if (activity && Object.values(activity).some((items) => items.length)) {
+    if (!disposition?.trim())
+      throw new Error(
+        'Prior late review activity requires --review-activity-disposition before continuation',
+      );
+    evidence.reviewActivityDispositions.push({
+      previousCollectedAt: previous.collectedAt,
+      activity,
+      note: disposition,
+    });
+  }
+  evidence.newReviewActivity = newReviewActivity(evidence, previous);
 }
 export function newReviewActivity(current, previous) {
   const knownComments = new Map(
@@ -206,6 +251,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
       'review-note': { type: 'string' },
       output: { type: 'string' },
       previous: { type: 'string' },
+      'review-activity-disposition': { type: 'string' },
     },
   });
   const number = Number(positionals[0]);
@@ -217,21 +263,31 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     throw new Error(
       'Usage: npm run release:evidence -- PR --phase premerge|complete --reviewed-head SHA --review-note NOTE',
     );
+  if (values.phase === 'complete' && !values.previous)
+    throw new Error('Completion requires --previous for the matching premerge observation');
   const evidence = await collect(number);
   evidence.reviewConfirmation = { head: values['reviewed-head'], note: values['review-note'] };
+  evidence.phase = values.phase;
+  if (values.phase === 'premerge') evidence.requiredChecksAtMerge = evidence.requiredChecks;
+  if (values.previous)
+    applyPreviousObservation(
+      evidence,
+      JSON.parse(await readFile(values.previous, 'utf8')),
+      values.phase,
+      values['review-activity-disposition'],
+    );
   evidence.problems = releaseProblems(evidence, {
     phase: values.phase,
     reviewedHead: values['reviewed-head'],
     reviewNote: values['review-note'],
   });
-  if (values.previous) {
-    const previous = JSON.parse(await readFile(values.previous, 'utf8'));
-    evidence.newReviewActivity = newReviewActivity(evidence, previous);
-    if (Object.values(evidence.newReviewActivity).some((items) => items.length))
-      evidence.problems.push(
-        'New or edited review activity since previous inspection; disposition and repeat inspection required',
-      );
-  }
+  if (
+    evidence.newReviewActivity &&
+    Object.values(evidence.newReviewActivity).some((items) => items.length)
+  )
+    evidence.problems.push(
+      'New or edited review activity since previous inspection; disposition and repeat inspection required',
+    );
   const output = values.output || `artifacts/release-evidence/pr-${number}-${values.phase}.json`;
   const { dirname } = await import('node:path');
   await mkdir(dirname(output), { recursive: true });
