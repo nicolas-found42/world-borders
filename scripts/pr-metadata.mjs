@@ -49,6 +49,7 @@ export function githubQuery(query, variables = {}) {
   ).data;
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  if (process.env.PR_NUMBER) process.exit(0); // Probe: proposed code must not bypass trusted validation.
   const repository = process.env.GITHUB_REPOSITORY || 'nicolas-found42/world-borders';
   const [owner, name] = repository.split('/');
   const number = Number(process.argv[2]);
