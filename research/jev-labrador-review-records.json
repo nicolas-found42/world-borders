@@ -1,0 +1,350 @@
+{
+  "artifact": "Labrador boundary source review records",
+  "recordedAt": "2026-10-02",
+  "scope": "Source-level compatibility review of the 1949 NRCan Newfoundland division, British North America Act Terms of Union, and the Judicial Committee's 1927 Labrador boundary ruling. This does not certify coordinate accuracy or topology.",
+  "sourcePages": [
+    {
+      "id": "parks_canada_event",
+      "url": "https://parks.canada.ca/culture/designation/evenement-event/terre-neuve-confederation-newfoundland",
+      "sourceType": "Official Canadian federal event page (secondary summary of historical date)",
+      "firecrawl": {
+        "tool": "mcp__firecrawl__firecrawl_scrape",
+        "formats": ["markdown"],
+        "onlyMainContent": true,
+        "maxAge": 0,
+        "timeout": 60000
+      },
+      "snapshot": {
+        "path": "artifacts/temporal-slice/source-pages/PARKS_CANADA_NEWFOUNDLAND_SOURCE.md",
+        "textEncoding": "UTF-8 Firecrawl Markdown",
+        "textCharacters": 3519,
+        "sha256": "0a2a15bb1b24b285ddde9dbe868f9ef3f0b574888505e5ae08ce9bc041f5e547"
+      },
+      "excerpts": [
+        {
+          "field": "union_date",
+          "text": "Newfoundland entered Confederation on 31 March 1949.",
+          "offset": 926,
+          "sha256": "ee373f21077eefb68443e0758fc154ab0557d2d9019647132e65dbf05a744321"
+        },
+        {
+          "field": "status_before_union",
+          "text": "Self-government and Dominion status followed but these were placed in abeyance in 1933 when Government by Commission was instituted.",
+          "offset": 1091
+        }
+      ],
+      "screen": {
+        "tool": "mcp__jev__jev_screen",
+        "input": {
+          "purpose": "Screen full fetched source page before using exact historical passages: https://parks.canada.ca/culture/designation/evenement-event/terre-neuve-confederation-newfoundland",
+          "textSourceSnapshot": "artifacts/temporal-slice/source-pages/PARKS_CANADA_NEWFOUNDLAND_SOURCE.md",
+          "textSha256": "0a2a15bb1b24b285ddde9dbe868f9ef3f0b574888505e5ae08ce9bc041f5e547"
+        },
+        "output": {
+          "tool": "jev_screen",
+          "model": "typesafe/jev-1.13",
+          "provider": "openrouter",
+          "probabilities": {
+            "injection": 0.19,
+            "substance": 0.99,
+            "relevance": 0.92
+          },
+          "thresholds": {
+            "block_at": 0.75,
+            "review_at": 0.25
+          },
+          "recommendation": {
+            "action": "pass",
+            "reason": "no signals above thresholds"
+          },
+          "usage": {
+            "input_tokens": 1470,
+            "output_tokens": 57
+          }
+        }
+      }
+    },
+    {
+      "id": "british_north_america_act_terms",
+      "url": "https://www.legislation.gov.uk/ukpga/Geo6/12-13-14/22/enacted",
+      "sourceType": "UK Parliament primary legislation, enacted text",
+      "firecrawl": {
+        "tool": "mcp__firecrawl__firecrawl_scrape",
+        "formats": ["markdown"],
+        "onlyMainContent": true,
+        "maxAge": 0,
+        "timeout": 60000
+      },
+      "snapshot": {
+        "path": "artifacts/temporal-slice/source-pages/BRITISH_NORTH_AMERICA_ACT_1949_SOURCE.md",
+        "textEncoding": "UTF-8 Firecrawl Markdown",
+        "textCharacters": 63262,
+        "sha256": "37d43715ea1a5f32f94275eeb70507d8900b75c7578bab950f1b29632cfc0365"
+      },
+      "excerpts": [
+        {
+          "field": "term_1_union_status",
+          "text": "Newfoundland shall form part of Canada",
+          "offset": 11229,
+          "sha256": "f740143d4ec11ff2c9c2f2d9a9ed7091b8a96457da54521f1e127841aac62780"
+        },
+        {
+          "field": "term_2_labrador_reference",
+          "text": "the Coast of Labrador as delimited in the report",
+          "offset": 11523,
+          "sha256": "92ac9c4843663d007a285dd23ef203bfff30bd7f1f94c333d988d015248017e2"
+        },
+        {
+          "field": "term_2_full_text",
+          "text": "The Province of Newfoundland shall comprise the same territory as at the date of Union, that is to say, the island of Newfoundland and the islands adjacent thereto, the Coast of Labrador as delimited in the report delivered by the Judicial Committee of His Majesty's Privy Council on the first day of March, 1927, and approved by His Majesty in His Privy Council on the twenty-second day of March, 1927, and the islands adjacent to the said Coast of Labrador.",
+          "offset": 11358
+        }
+      ],
+      "screen": {
+        "tool": "mcp__jev__jev_screen",
+        "input": {
+          "purpose": "Screen full fetched source page before using exact historical passages: https://www.legislation.gov.uk/ukpga/Geo6/12-13-14/22/enacted",
+          "textSourceSnapshot": "artifacts/temporal-slice/source-pages/BRITISH_NORTH_AMERICA_ACT_1949_SOURCE.md",
+          "textSha256": "37d43715ea1a5f32f94275eeb70507d8900b75c7578bab950f1b29632cfc0365"
+        },
+        "output": {
+          "tool": "jev_screen",
+          "model": "typesafe/jev-1.13",
+          "provider": "openrouter",
+          "probabilities": {
+            "injection": 0.08,
+            "substance": 0.99,
+            "relevance": 0.94
+          },
+          "thresholds": {
+            "block_at": 0.75,
+            "review_at": 0.25
+          },
+          "recommendation": {
+            "action": "pass",
+            "reason": "no signals above thresholds"
+          },
+          "usage": {
+            "input_tokens": 14998,
+            "output_tokens": 57
+          }
+        }
+      }
+    },
+    {
+      "id": "nrcan_territorial_evolution_1949",
+      "url": "https://open.canada.ca/data/en/dataset/cc6e5df0-8893-11e0-9779-6cf049291510",
+      "sourceType": "Natural Resources Canada official map metadata and dataset description",
+      "firecrawl": {
+        "tool": "mcp__firecrawl__firecrawl_scrape",
+        "formats": ["markdown"],
+        "onlyMainContent": true,
+        "maxAge": 0,
+        "timeout": 60000
+      },
+      "snapshot": {
+        "path": "artifacts/temporal-slice/source-pages/NR_CANADA_TERRITORIAL_EVOLUTION_1949.md",
+        "textEncoding": "UTF-8 Firecrawl Markdown",
+        "textCharacters": 6937,
+        "sha256": "9f9b06b3a940fb65163eea711bb4786720a862123870cf6bfff55d9d8e102001"
+      },
+      "excerpts": [
+        {
+          "field": "1949_geometry_basis",
+          "text": "In 1949, Newfoundland enters Confederation as the tenth province with the boundaries as delimited in 1927.",
+          "offset": 69,
+          "sha256": "ff914c5740971a1f3fed26dd056e0d6da2095da56a12cbc4974d19780e00487f"
+        }
+      ],
+      "screen": {
+        "tool": "mcp__jev__jev_screen",
+        "input": {
+          "purpose": "Screen the official Natural Resources Canada Territorial Evolution, 1949 page before using its statement about source boundaries: https://open.canada.ca/data/en/dataset/cc6e5df0-8893-11e0-9779-6cf049291510",
+          "textSourceSnapshot": "artifacts/temporal-slice/source-pages/NR_CANADA_TERRITORIAL_EVOLUTION_1949.md",
+          "textSha256": "9f9b06b3a940fb65163eea711bb4786720a862123870cf6bfff55d9d8e102001"
+        },
+        "output": {
+          "tool": "jev_screen",
+          "model": "typesafe/jev-1.13",
+          "provider": "openrouter",
+          "probabilities": {
+            "injection": 0.04,
+            "substance": 0.96,
+            "relevance": 0.92
+          },
+          "thresholds": {
+            "block_at": 0.75,
+            "review_at": 0.25
+          },
+          "recommendation": {
+            "action": "pass",
+            "reason": "no signals above thresholds"
+          },
+          "usage": {
+            "input_tokens": 3087,
+            "output_tokens": 57
+          }
+        }
+      }
+    },
+    {
+      "id": "1927_judicial_committee_holding",
+      "metadataUrl": "https://collections.mun.ca/digital/collection/cns2/id/109347/",
+      "pdfUrl": "https://dai.mun.ca/PDFs/cns/TextoftheReportofthePrivyCouncilontheLabradorBoundaryDispute1927.pdf",
+      "sourceType": "Contemporaneous printed copy of the Judicial Committee of the Privy Council report, delivered 1 March 1927; digitized by Memorial University Centre for Newfoundland Studies.",
+      "firecrawl": {
+        "tool": "mcp__firecrawl__firecrawl_scrape",
+        "formats": ["markdown"],
+        "parsers": ["pdf"],
+        "pdfOptions": {
+          "maxPages": 40
+        },
+        "onlyMainContent": true,
+        "maxAge": 0,
+        "timeout": 120000
+      },
+      "snapshot": {
+        "path": "artifacts/temporal-slice/source-pages/PRIVY_COUNCIL_LABRADOR_1927_HOLDING.txt",
+        "textEncoding": "UTF-8 verbatim excerpt from Firecrawl PDF Markdown",
+        "sha256": "15a810f2c01f8bcdcb1d0d32dee5d4ec07a148ba8b5675b7997dc42ffb6141d8"
+      },
+      "holdingText": "The boundary between Canada and Newfoundland in the Labrador Peninsula is a line drawn due north from the eastern boundary of the bay or harbour of Ance Sablon as far as the fifty-second degree of north latitude, and from thence westward along that parallel until it reaches the Romaine river, and then northward along the left or east bank of that river and its head waters to their source and from thence due north to the crest of the watershed or height of land there, and from thence westward and northward along the crest of the watershed of the rivers flowing into the Atlantic Ocean until it reaches Cape Chidley.",
+      "screen": {
+        "tool": "mcp__jev__jev_screen",
+        "input": {
+          "purpose": "Screen the exact operative holding from the 1927 Judicial Committee report before citing it as legal boundary text.",
+          "source": "Memorial University digital copy of the 1927 report: https://dai.mun.ca/PDFs/cns/TextoftheReportofthePrivyCouncilontheLabradorBoundaryDispute1927.pdf",
+          "text": "The boundary between Canada and Newfoundland in the Labrador Peninsula is a line drawn due north from the eastern boundary of the bay or harbour of Ance Sablon as far as the fifty-second degree of north latitude, and from thence westward along that parallel until it reaches the Romaine river, and then northward along the left or east bank of that river and its head waters to their source and from thence due north to the crest of the watershed or height of land there, and from thence westward and northward along the crest of the watershed of the rivers flowing into the Atlantic Ocean until it reaches Cape Chidley."
+        },
+        "output": {
+          "tool": "jev_screen",
+          "model": "typesafe/jev-1.13",
+          "provider": "openrouter",
+          "probabilities": {
+            "injection": 0.15,
+            "substance": 0.98,
+            "relevance": 0.96
+          },
+          "thresholds": {
+            "block_at": 0.75,
+            "review_at": 0.25
+          },
+          "recommendation": {
+            "action": "pass",
+            "reason": "no signals above thresholds"
+          },
+          "usage": {
+            "input_tokens": 745,
+            "output_tokens": 57
+          }
+        }
+      }
+    },
+    {
+      "id": "verify_labrador_source_alignment",
+      "tool": "mcp__jev__jev_verify",
+      "input": {
+        "claims": [
+          "Term 2 of the British North America Act 1949 defines Newfoundland's province territory at Union as Newfoundland Island, adjacent islands, the Labrador coast as delimited by the 1 March 1927 Judicial Committee report approved 22 March 1927, and adjacent Labrador islands.",
+          "The 1927 Judicial Committee report's conclusion defines the Canada-Newfoundland line from Ance Sablon north to 52°N, west along that parallel to the Romaine River, north along its east bank/headwaters to their source, due north to the watershed, then along the Atlantic-river watershed to Cape Chidley.",
+          "Natural Resources Canada's separate Territorial Evolution, 1949 dataset says Newfoundland enters Confederation as the tenth province with boundaries as delimited in 1927.",
+          "The 1949 service grouping labels the Newfoundland feature within Canada (1949), and the local boundary question concerns an internal Canada provincial division when all Canadian service divisions are dissolved into Canada."
+        ],
+        "evidence": [
+          {
+            "id": "act_term2",
+            "text": "The British North America Act 1949, Schedule, Terms of Union, Term 2: “The Province of Newfoundland shall comprise the same territory as at the date of Union, that is to say, the island of Newfoundland and the islands adjacent thereto, the Coast of Labrador as delimited in the report delivered by the Judicial Committee of His Majesty's Privy Council on the first day of March, 1927, and approved by His Majesty in His Privy Council on the twenty-second day of March, 1927, and the islands adjacent to the said Coast of Labrador.”"
+          },
+          {
+            "id": "jcpc_1927",
+            "text": "1927 Judicial Committee report, conclusion: “the boundary between Canada and Newfoundland in the Labrador Peninsula is a line drawn due north from the eastern boundary of the bay or harbour of Ance Sablon as far as the fifty-second degree of north latitude, and from thence westward along that parallel until it reaches the Romaine river, and then northward along the left or east bank of that river and its head waters to their source and from thence due north to the crest of the watershed or height of land there, and from thence westward and northward along the crest of the watershed of the rivers flowing into the Atlantic Ocean until it reaches Cape Chidley”. Report delivered 1 March 1927."
+          },
+          {
+            "id": "nrcan_1949_catalog",
+            "text": "Natural Resources Canada Open Data Portal, separate dataset “Territorial Evolution, 1949”: “In 1949, Newfoundland enters Confederation as the tenth province with the boundaries as delimited in 1927.” Publisher is Natural Resources Canada; licence is Open Government Licence - Canada."
+          },
+          {
+            "id": "nrcan_service_1949",
+            "text": "English ArcGIS REST layer 8 attribute query where START_TIME=1949 returns Newfoundland with START_TIME 1949, END_TIME 1949, and Period_Group “Canada (1949)”. Filtered geometry query where START_TIME=1949 AND PROV_NAME='Newfoundland' returns a GeoJSON MultiPolygon for that feature."
+          }
+        ],
+        "auto_accept": 0.8
+      },
+      "output": {
+        "tool": "jev_verify",
+        "model": "typesafe/jev-1.13",
+        "provider": "openrouter",
+        "auto_accept": 0.8,
+        "subject_at": 0.5,
+        "summary": {
+          "verified": 4,
+          "contradicted": 0,
+          "unsupported": 0,
+          "needs_review": 1
+        },
+        "results": [
+          {
+            "id": "claim0",
+            "claim": "Term 2 of the British North America Act 1949 defines Newfoundland's province territory at Union as Newfoundland Island, adjacent islands, the Labrador coast as delimited by the 1 March 1927 Judicial Committee report approved 22 March 1927, and adjacent Labrador islands.",
+            "verdict": "verified",
+            "probabilities": {
+              "contradicts": 0,
+              "supports": 1,
+              "says_nothing": 0
+            },
+            "confidence": 1,
+            "action": "auto",
+            "supporting_evidence": "act_term2",
+            "same_subject": 0.85
+          },
+          {
+            "id": "claim1",
+            "claim": "The 1927 Judicial Committee report's conclusion defines the Canada-Newfoundland line from Ance Sablon north to 52°N, west along that parallel to the Romaine River, north along its east bank/headwaters to their source, due north to the watershed, then along the Atlantic-river watershed to Cape Chidley.",
+            "verdict": "verified",
+            "probabilities": {
+              "contradicts": 0.07,
+              "supports": 0.93,
+              "says_nothing": 0
+            },
+            "confidence": 0.89,
+            "action": "auto",
+            "supporting_evidence": "jcpc_1927",
+            "same_subject": 0.79
+          },
+          {
+            "id": "claim2",
+            "claim": "Natural Resources Canada's separate Territorial Evolution, 1949 dataset says Newfoundland enters Confederation as the tenth province with boundaries as delimited in 1927.",
+            "verdict": "verified",
+            "probabilities": {
+              "contradicts": 0,
+              "supports": 1,
+              "says_nothing": 0
+            },
+            "confidence": 1,
+            "action": "auto",
+            "supporting_evidence": "nrcan_1949_catalog",
+            "same_subject": 0.73
+          },
+          {
+            "id": "claim3",
+            "claim": "The 1949 service grouping labels the Newfoundland feature within Canada (1949), and the local boundary question concerns an internal Canada provincial division when all Canadian service divisions are dissolved into Canada.",
+            "verdict": "verified",
+            "probabilities": {
+              "contradicts": 0.16,
+              "supports": 0.46,
+              "says_nothing": 0.38
+            },
+            "confidence": 0.19,
+            "action": "review",
+            "supporting_evidence": "nrcan_service_1949",
+            "same_subject": 0.73
+          }
+        ],
+        "usage": {
+          "input_tokens": 2565,
+          "output_tokens": 571
+        }
+      }
+    }
+  ]
+}
