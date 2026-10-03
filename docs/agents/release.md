@@ -26,8 +26,10 @@ npm run release:evidence -- PR_NUMBER --phase complete --reviewed-head HEAD_SHA 
 
 New threads, replies, submitted reviews, and edited review comments since the earlier
 inspection fail the command even after merge.
-Inspect and disposition them, then save a new observation as the previous baseline
-and repeat. Completion also requires the deployed SHA to match the checked current
+Inspect and disposition them. When continuing from an observation that detected
+late activity, add `--review-activity-disposition "<finding IDs, decision and repair evidence>"`;
+the JSON retains the affected activity and your disposition. Then repeat using that
+observation as the previous baseline. Completion also requires the deployed SHA to match the checked current
 main, an integrated merge and closed completed issues. The prior observation must
 match the PR and head and originate in a successful premerge observation; completion
 uses its saved merge requirements, retaining the

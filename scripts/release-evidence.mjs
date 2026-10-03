@@ -67,7 +67,7 @@ export function releaseProblems(evidence, { phase, reviewedHead, reviewNote }) {
   }
   return problems;
 }
-export function applyPreviousObservation(evidence, previous, phase) {
+export function applyPreviousObservation(evidence, previous, phase, disposition) {
   if (
     previous.repository !== evidence.repository ||
     previous.pr.headRefOid !== evidence.pr.headRefOid ||
@@ -92,6 +92,18 @@ export function applyPreviousObservation(evidence, previous, phase) {
       throw new Error('Previous evidence lacks a valid merge-check snapshot');
     evidence.requiredChecksAtMerge = savedChecks;
     evidence.mergeRequirementsVerified = true;
+  }
+  const activity = previous.newReviewActivity;
+  if (activity && Object.values(activity).some((items) => items.length)) {
+    if (!disposition?.trim())
+      throw new Error(
+        'Prior late review activity requires --review-activity-disposition before continuation',
+      );
+    evidence.reviewActivityDisposition = {
+      previousCollectedAt: previous.collectedAt,
+      activity,
+      note: disposition,
+    };
   }
   evidence.newReviewActivity = newReviewActivity(evidence, previous);
 }
@@ -238,6 +250,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
       'review-note': { type: 'string' },
       output: { type: 'string' },
       previous: { type: 'string' },
+      'review-activity-disposition': { type: 'string' },
     },
   });
   const number = Number(positionals[0]);
@@ -260,6 +273,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
       evidence,
       JSON.parse(await readFile(values.previous, 'utf8')),
       values.phase,
+      values['review-activity-disposition'],
     );
   evidence.problems = releaseProblems(evidence, {
     phase: values.phase,

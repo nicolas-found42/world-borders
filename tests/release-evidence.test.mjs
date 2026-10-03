@@ -208,3 +208,31 @@ test('only a successful premerge baseline can initialize historical requirements
     /valid merge-check/,
   );
 });
+
+test('a late-review completion cannot be silently used as the next baseline', () => {
+  const previous = {
+    ...fixture(),
+    phase: 'complete',
+    mergeRequirementsVerified: true,
+    requiredChecksAtMerge: ['verify'],
+    problems: ['late review'],
+    newReviewActivity: { comments: [{ id: 'reply' }], reviews: [], threads: [] },
+  };
+  assert.throws(
+    () => applyPreviousObservation(fixture(), previous, 'complete'),
+    /review-activity-disposition/,
+  );
+  assert.throws(
+    () => applyPreviousObservation(fixture(), previous, 'premerge'),
+    /review-activity-disposition/,
+  );
+  const current = fixture();
+  applyPreviousObservation(
+    current,
+    previous,
+    'complete',
+    'Inspected reply: addressed in the merged regression; thread resolved.',
+  );
+  assert.equal(current.reviewActivityDisposition.activity.comments[0].id, 'reply');
+  assert.match(current.reviewActivityDisposition.note, /merged regression/);
+});
