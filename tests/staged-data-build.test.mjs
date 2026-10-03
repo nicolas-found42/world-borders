@@ -40,3 +40,81 @@ test('a later source failure preserves the complete active cache and bundle; suc
     await rm(root, { recursive: true, force: true });
   }
 });
+
+test('interruption at each directory rename boundary is recovered before the next build', async () => {
+  const { spawnSync } = await import('node:child_process');
+  const { rename } = await import('node:fs/promises');
+  const deadPid = spawnSync(process.execPath, ['-e', '']).pid;
+  for (const completedRenames of [0, 1, 2, 3, 4, 5]) {
+    const root = await mkdtemp(join(tmpdir(), 'world-borders-interrupted-'));
+    const cache = join(root, 'cache');
+    const output = join(root, 'output');
+    const entries = [cache, output].map((target, i) => ({
+      target,
+      stage: join(root, `stage-${i}`),
+      backup: join(root, `backup-${i}`),
+      hadOriginal: true,
+    }));
+    try {
+      for (const entry of entries) {
+        await mkdir(entry.target);
+        await mkdir(entry.stage);
+        await writeFile(join(entry.target, 'version'), 'old');
+        await writeFile(join(entry.stage, 'version'), 'new');
+      }
+      await writeFile(
+        join(root, '.cache.transaction.json'),
+        JSON.stringify({
+          pid: deadPid,
+          phase: completedRenames === 5 ? 'committed' : 'installing',
+          entries,
+        }),
+      );
+      const operations = entries.flatMap((e) => [
+        [e.target, e.backup],
+        [e.stage, e.target],
+      ]);
+      for (const [from, to] of operations.slice(0, completedRenames)) await rename(from, to);
+      await assert.rejects(
+        stagedDataBuild(cache, output, async () => {
+          assert.equal(
+            await readFile(join(cache, 'version'), 'utf8'),
+            completedRenames === 5 ? 'new' : 'old',
+          );
+          assert.equal(
+            await readFile(join(output, 'version'), 'utf8'),
+            completedRenames === 5 ? 'new' : 'old',
+          );
+          throw new Error('Stop after verified recovery');
+        }),
+        /Stop after verified recovery/,
+      );
+      assert.deepEqual((await readdir(root)).sort(), ['cache', 'output']);
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  }
+});
+
+test('symlink targets and aliases cannot bypass directory separation', async () => {
+  const { symlink } = await import('node:fs/promises');
+  const root = await mkdtemp(join(tmpdir(), 'world-borders-paths-'));
+  try {
+    const cache = join(root, 'cache');
+    await mkdir(cache);
+    const alias = join(root, 'alias');
+    await symlink(cache, alias, 'dir');
+    await assert.rejects(
+      stagedDataBuild(cache, alias, () => {}),
+      /not symlinks/,
+    );
+    const parentAlias = join(root, 'parent-alias');
+    await symlink(root, parentAlias, 'dir');
+    await assert.rejects(
+      stagedDataBuild(cache, join(parentAlias, 'cache'), () => {}),
+      /non-nested/,
+    );
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});

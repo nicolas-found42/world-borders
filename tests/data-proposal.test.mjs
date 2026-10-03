@@ -74,6 +74,11 @@ test('changed-data proposal pushes only a review branch and requests a draft; du
     const head = git('rev-parse', 'HEAD');
     assert.match(run({ PROPOSAL_EXISTS: '1' }), /already covers/);
     assert.equal(git('rev-parse', 'HEAD'), head);
+    await writeFile(join(cwd, 'public/data/unexpected.json'), '{}');
+    git('add', 'public/data');
+    git('commit', '-m', 'test: unexpected remote file');
+    git('push', 'origin', branch);
+    assert.throws(() => run(), /unexpected data file set/);
   } finally {
     await rm(root, { recursive: true, force: true });
   }

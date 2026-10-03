@@ -10,3 +10,4 @@ playwright-report/
 
 # Temporary transaction directories during geographic rebuilds.
 **/.*.pending-*/
+**/.*.transaction.json*

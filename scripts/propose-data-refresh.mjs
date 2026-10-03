@@ -31,6 +31,13 @@ if (!report.changedFiles.length) {
       if (remoteBranch) {
         // Recover a successful push followed by an interrupted/failed PR creation.
         git('fetch', 'origin', `refs/heads/${branch}`);
+        const remoteFiles = git('ls-tree', '-r', '--name-only', 'FETCH_HEAD', '--', 'public/data')
+          .split('\n')
+          .filter(Boolean)
+          .map((path) => path.slice('public/data/'.length))
+          .sort();
+        if (JSON.stringify(remoteFiles) !== JSON.stringify(Object.keys(report.after.files).sort()))
+          throw new Error('Existing proposal branch has an unexpected data file set');
         for (const [file, expected] of Object.entries(report.after.files)) {
           const raw = execFileSync('git', ['show', `FETCH_HEAD:public/data/${file}`]);
           if (createHash('sha256').update(raw).digest('hex') !== expected.sha256)
