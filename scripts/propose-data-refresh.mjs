@@ -31,6 +31,18 @@ if (!report.changedFiles.length) {
       if (remoteBranch) {
         // Recover a successful push followed by an interrupted/failed PR creation.
         git('fetch', 'origin', `refs/heads/${branch}`);
+        git('fetch', 'origin', 'refs/heads/main');
+        const base = git('merge-base', 'FETCH_HEAD', remoteBranch.split(/\s+/)[0]);
+        const changed = git('diff', '--name-only', base, remoteBranch.split(/\s+/)[0])
+          .split('\n')
+          .filter(Boolean);
+        const expected = report.changedFiles.map((file) => `public/data/${file}`).sort();
+        if (JSON.stringify(changed.sort()) !== JSON.stringify(expected))
+          throw new Error(
+            'Existing proposal branch has unexpected changes outside the reviewed diff or unexpected data file set',
+          );
+        // Fetching main changed FETCH_HEAD; inspect the exact proposal commit throughout.
+        git('fetch', 'origin', remoteBranch.split(/\s+/)[0]);
         const remoteFiles = git('ls-tree', '-r', '--name-only', 'FETCH_HEAD', '--', 'public/data')
           .split('\n')
           .filter(Boolean)
@@ -52,7 +64,7 @@ if (!report.changedFiles.length) {
         git('push', 'origin', branch);
       }
       const details = await readFile('artifacts/data-review/report.md', 'utf8');
-      const body = `## Summary\n\nFresh source inputs changed the committed geographic bundle. This is a draft for historical and licensing review.\n\nConceptual diff:\n\n\`\`\`diff\n- committed input hashes and polygons\n+ fresh input hashes and regenerated polygons (files listed in evidence)\n\`\`\`\n\n## Evidence\n\n${details}\n\n[Download before/after maps, hash/coverage report and advisory Jev input/results](${process.env.EVIDENCE_URL}). Artifact retention is 30 days; rerun if expired before review. Linux unit/data/build/bundle/browser checks and byte-identical cached replay passed before this proposal.\n\nA maintainer must inspect historical interpretation and mark ready for review to trigger normal PR checks. GITHUB_TOKEN-created draft PRs do not start those checks automatically. No automatic merge or publication occurs.\n\n## Merge Danger\n\nTwo-way technical rollback by reverting this PR, but inaccurate historical claims could mislead visitors while published. Review each affected year, exclusions, licenses and primary evidence; Jev is advisory.\n`;
+      const body = `<!-- completed-issues: [] -->\n\n## Summary\n\nFresh source inputs changed the committed geographic bundle. This is a draft for historical and licensing review.\n\nConceptual diff:\n\n\`\`\`diff\n- committed input hashes and polygons\n+ fresh input hashes and regenerated polygons (files listed in evidence)\n\`\`\`\n\n## Evidence\n\n${details}\n\n[Download before/after maps, hash/coverage report and advisory Jev input/results](${process.env.EVIDENCE_URL}). Artifact retention is 30 days; rerun if expired before review. Linux unit/data/build/bundle/browser checks and byte-identical cached replay passed before this proposal.\n\nA maintainer must inspect historical interpretation and mark ready for review to trigger normal PR checks. GITHUB_TOKEN-created draft PRs do not start those checks automatically. No automatic merge or publication occurs.\n\n## Merge Danger\n\nTwo-way technical rollback by reverting this PR, but inaccurate historical claims could mislead visitors while published. Review each affected year, exclusions, licenses and primary evidence; Jev is advisory.\n`;
       await writeFile('artifacts/data-review/pr-body.md', body);
       console.log(
         gh(

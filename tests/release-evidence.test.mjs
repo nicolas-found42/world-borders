@@ -1,0 +1,110 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { validateClosingIssues, isDependencyBot } from '../scripts/pr-metadata.mjs';
+import { releaseProblems } from '../scripts/release-evidence.mjs';
+const repo = 'nicolas-found42/world-borders';
+const ref = (number) => ({ number, repository: { nameWithOwner: repo } });
+
+test('GitHub parsed closing links must match one explicit declaration, even in negated prose', () => {
+  assert.throws(
+    () => validateClosingIssues('<!-- completed-issues: [] -->\nDoes not close #1', [ref(1)], repo),
+    /GitHub parsed closing issues/,
+  );
+  assert.deepEqual(
+    validateClosingIssues('<!-- completed-issues: [10] -->\nCloses #10', [ref(10)], repo),
+    [10],
+  );
+  assert.throws(
+    () => validateClosingIssues('Related #10', [], repo),
+    /Declare completed issues once/,
+  );
+  assert.throws(
+    () => validateClosingIssues('<!-- completed-issues: [10,10] -->', [], repo),
+    /unique positive/,
+  );
+});
+function fixture() {
+  return {
+    pr: {
+      state: 'OPEN',
+      isDraft: false,
+      headRefOid: 'head',
+      mergeable: 'MERGEABLE',
+      mergeStateStatus: 'CLEAN',
+      reviewThreads: { nodes: [] },
+      commits: {
+        nodes: [
+          {
+            commit: {
+              statusCheckRollup: {
+                contexts: {
+                  nodes: [
+                    {
+                      __typename: 'CheckRun',
+                      name: 'verify',
+                      status: 'COMPLETED',
+                      conclusion: 'SUCCESS',
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        ],
+      },
+    },
+    requiredChecks: ['verify'],
+    upToDate: true,
+    integrated: true,
+    mainSha: 'merged',
+    deployedSha: 'merged',
+    mainRuns: [{ name: 'CI', status: 'completed', conclusion: 'success' }],
+    issues: [{ state: 'CLOSED', stateReason: 'COMPLETED' }],
+  };
+}
+const options = {
+  phase: 'premerge',
+  reviewedHead: 'head',
+  reviewNote: 'Final diff reviewed; external reviewer completion checked.',
+};
+test('release evidence rejects stale review, late threads, pending or absent checks and stale main', () => {
+  const e = fixture();
+  assert.deepEqual(releaseProblems(e, options), []);
+  assert.match(releaseProblems(e, { ...options, reviewedHead: 'old' }).join(), /current head/);
+  e.pr.reviewThreads.nodes.push({ isResolved: false });
+  assert.match(releaseProblems(e, options).join(), /Unresolved/);
+  e.pr.reviewThreads.nodes = [];
+  e.pr.commits.nodes[0].commit.statusCheckRollup.contexts.nodes[0].status = 'IN_PROGRESS';
+  assert.match(releaseProblems(e, options).join(), /Check not successful/);
+  e.pr.commits.nodes = [];
+  assert.match(releaseProblems(e, options).join(), /Missing required checks/);
+  e.upToDate = false;
+  assert.match(releaseProblems(e, options).join(), /current main/);
+});
+test('completion checks actual merge, deployed revision, successful main and issue completion', () => {
+  const e = fixture();
+  e.pr.state = 'MERGED';
+  e.pr.mergeCommit = { oid: 'merged' };
+  assert.deepEqual(releaseProblems(e, { ...options, phase: 'complete' }), []);
+  e.deployedSha = 'old';
+  e.issues[0].state = 'OPEN';
+  e.mainRuns[0].status = 'in_progress';
+  const errors = releaseProblems(e, { ...options, phase: 'complete' }).join();
+  assert.match(errors, /Deployed SHA/);
+  assert.match(errors, /closed as completed/);
+  assert.match(errors, /Main CI/);
+});
+
+test('only the actual dependency bot may omit an empty declaration', () => {
+  assert.equal(isDependencyBot({ login: 'dependabot', __typename: 'Bot' }), true);
+  assert.equal(isDependencyBot({ login: 'dependabot', __typename: 'User' }), false);
+  assert.deepEqual(
+    validateClosingIssues('Automated update', [], repo, { dependencyBot: true }),
+    [],
+  );
+  assert.throws(
+    () =>
+      validateClosingIssues('Automated update closes #1', [ref(1)], repo, { dependencyBot: true }),
+    /GitHub parsed/,
+  );
+});

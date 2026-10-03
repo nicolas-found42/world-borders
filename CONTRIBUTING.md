@@ -12,7 +12,8 @@ git switch -c codex/describe-the-change
 
 Use short-lived branches and small pull requests. Use Node 24 (see `.node-version`),
 `npm ci`, and the committed lockfile. Run `npm run format`, `npm run check`,
-`npx playwright install chromium`, then `npm run test:e2e`. Development and preview
+`npx playwright install chromium`, then `npm run test:e2e`. Use `PLAYWRIGHT_PORT` for an isolated browser-test port when another session is
+active. Development and preview
 URLs use `/world-borders/`; `APP_BASE_PATH=/` supports root hosting.
 
 ## Issues and pull requests
@@ -22,7 +23,9 @@ Agents follow the `issue-authoring` skill for issues and the `pr` skill for PRs.
 Describe the need, before/after behavior, acceptance criteria and real verification.
 Do not claim a screenshot, command or hosted check passed unless inspected.
 
-Before merge, inspect the final diff and remote checks. Main requires `verify` and
+Before merge, read `CODING_STANDARDS.md` and run the final review/evidence procedure
+in [release evidence](docs/agents/release.md). Repeat it before reporting completion.
+Inspect the final diff and remote checks. Main requires `verify` and
 `dependencies`, an up-to-date branch, a pull request and resolved conversations.
 There is no external-review count requirement for this solo-maintained project.
 Use conventional commit titles (`feat`, `fix`, `chore`, `ci`, `test`, `refactor`,
@@ -81,8 +84,9 @@ fresh-input/cached-input replay. The workflow:
    second build from those cached inputs is byte-identical. Cache and output are
    staged as a set; a failed fetch/build preserves both previous directories. A
    persistent transaction journal restores interrupted replacements on the next
-   build. Builds sharing a cache and symlink targets are rejected; concurrent local
-   builds must use distinct cache and output directories.
+   build. Heartbeat leases serialize recovery and installation for both destinations;
+   interrupted owners expire after 120 seconds without PID-based ownership. Symlink
+   targets are rejected. Concurrent local builds use distinct cache/output directories.
 2. Runs deterministic checks and Chromium, then records exact before/after input
    and output hashes, coverage, attribution, licenses, exclusions and map images.
 3. Runs an advisory Jev review with the repository's OpenRouter secret. Evidence,

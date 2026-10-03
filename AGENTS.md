@@ -23,3 +23,8 @@ Use the five standard triage labels for issue state. See `docs/agents/triage-lab
 ### Domain docs
 
 This is a single-context repo; read the root glossary and relevant ADRs when present. See `docs/agents/domain.md`.
+
+### Review and delivery
+
+During review read `CODING_STANDARDS.md`. Before merge and completion follow
+`docs/agents/release.md` for current review, checks, deployment and issue evidence.

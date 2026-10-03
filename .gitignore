@@ -11,3 +11,6 @@ playwright-report/
 # Temporary transaction directories during geographic rebuilds.
 **/.*.pending-*/
 **/.*.transaction.json*
+
+# Heartbeat leases for staged geographic builds.
+**/.*.build-lock/
