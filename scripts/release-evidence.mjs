@@ -4,7 +4,6 @@ import { pathToFileURL } from 'node:url';
 import { parseArgs } from 'node:util';
 import { githubQuery, validateClosingIssues, isDependencyBot } from './pr-metadata.mjs';
 
-const acceptable = new Set(['SUCCESS', 'NEUTRAL', 'SKIPPED']);
 export function releaseProblems(evidence, { phase, reviewedHead, reviewNote }) {
   const problems = [];
   const { pr } = evidence;
