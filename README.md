@@ -81,11 +81,11 @@ date-line wrapping, Canadian triangulation size, provenance and sourced ownershi
 checks. Browser tests exercise real playback, camera movement and preservation,
 wheel gestures, snapshot selection, dialogs and a narrow viewport.
 
-To rebuild the geographic bundle, run `npm run data:build`. Verbatim downloads
-are cached in `.data-cache/`. Published snapshot files and input hashes are tracked
-in Git. Deleting the cache and rebuilding may fetch newer upstream versions;
-review the resulting changes before accepting them. Source revisions may change,
-and the service cannot be presumed available indefinitely.
+To rebuild from cached inputs, run `npm run data:build`. For fresh inputs, run
+`npm run data:build -- --refresh`. The manual/monthly **Geographic source review**
+workflow generates reproducibility, hash/coverage, advisory Jev and before/after
+map evidence and proposes changed data in a draft PR. See [the review procedure](CONTRIBUTING.md#refresh-procedure).
+Ordinary CI and deployments use committed data; source updates are reviewed before publication.
 
 ## Architecture
 

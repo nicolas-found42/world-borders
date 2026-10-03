@@ -28,7 +28,14 @@ export default defineConfig({
       ? [
           {
             name: 'firefox',
-            use: { ...devices['Desktop Firefox'], viewport: { width: 1440, height: 950 } },
+            use: {
+              ...devices['Desktop Firefox'],
+              viewport: { width: 1440, height: 950 },
+              headless: !process.env.CI,
+              launchOptions: {
+                firefoxUserPrefs: { 'webgl.force-enabled': true, 'gfx.webrender.software': true },
+              },
+            },
           },
         ]
       : []),

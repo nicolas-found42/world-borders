@@ -7,3 +7,7 @@ test-results/
 playwright-report/
 *.log
 *.tsbuildinfo
+
+# Temporary transaction directories during geographic rebuilds.
+**/.*.pending-*/
+**/.*.transaction.json*
