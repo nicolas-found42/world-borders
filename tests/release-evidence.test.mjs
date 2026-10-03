@@ -1,7 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { validateClosingIssues, isDependencyBot } from '../scripts/pr-metadata.mjs';
-import { releaseProblems, newReviewActivity } from '../scripts/release-evidence.mjs';
+import {
+  releaseProblems,
+  newReviewActivity,
+  applyPreviousObservation,
+} from '../scripts/release-evidence.mjs';
 const repo = 'nicolas-found42/world-borders';
 const ref = (number) => ({ number, repository: { nameWithOwner: repo } });
 
@@ -161,4 +165,46 @@ test('completion CLI requires the prior observation before contacting GitHub', a
   );
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, /Completion requires --previous/);
+});
+
+test('a second premerge inspection records current policy rather than older gates', () => {
+  const previous = { ...fixture(), phase: 'premerge', problems: [], requiredChecks: ['verify'] };
+  const current = { ...fixture(), requiredChecks: ['verify', 'metadata'] };
+  current.requiredChecksAtMerge = current.requiredChecks;
+  applyPreviousObservation(current, previous, 'premerge');
+  assert.deepEqual(current.requiredChecksAtMerge, ['verify', 'metadata']);
+  assert.match(releaseProblems(current, options).join(), /Missing required checks: metadata/);
+  current.phase = 'premerge';
+  current.problems = ['Missing required checks: metadata'];
+  assert.throws(
+    () => applyPreviousObservation(fixture(), current, 'complete'),
+    /successful premerge/,
+  );
+});
+
+test('only a successful premerge baseline can initialize historical requirements', () => {
+  const previous = {
+    ...fixture(),
+    phase: 'premerge',
+    problems: ['failed'],
+    requiredChecks: ['verify'],
+  };
+  assert.throws(
+    () => applyPreviousObservation(fixture(), previous, 'complete'),
+    /successful premerge/,
+  );
+  previous.problems = [];
+  const current = fixture();
+  applyPreviousObservation(current, previous, 'complete');
+  assert.deepEqual(current.requiredChecksAtMerge, ['verify']);
+  current.phase = 'complete';
+  current.problems = ['late review requires disposition'];
+  const continuation = fixture();
+  applyPreviousObservation(continuation, current, 'complete');
+  assert.deepEqual(continuation.requiredChecksAtMerge, ['verify']);
+  previous.requiredChecks = null;
+  assert.throws(
+    () => applyPreviousObservation(fixture(), previous, 'complete'),
+    /valid merge-check/,
+  );
 });

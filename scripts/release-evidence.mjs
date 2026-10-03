@@ -67,6 +67,34 @@ export function releaseProblems(evidence, { phase, reviewedHead, reviewNote }) {
   }
   return problems;
 }
+export function applyPreviousObservation(evidence, previous, phase) {
+  if (
+    previous.repository !== evidence.repository ||
+    previous.pr.headRefOid !== evidence.pr.headRefOid ||
+    previous.pr.url !== evidence.pr.url
+  )
+    throw new Error('Previous evidence must belong to the same PR and reviewed head');
+  if (phase === 'complete') {
+    const initial =
+      previous.phase === 'premerge' &&
+      Array.isArray(previous.problems) &&
+      previous.problems.length === 0;
+    const continued = previous.phase === 'complete' && previous.mergeRequirementsVerified === true;
+    if (!initial && !continued)
+      throw new Error(
+        'Completion requires a successful premerge observation or its completion continuation',
+      );
+    const savedChecks = initial ? previous.requiredChecks : previous.requiredChecksAtMerge;
+    if (
+      !Array.isArray(savedChecks) ||
+      savedChecks.some((name) => typeof name !== 'string' || !name)
+    )
+      throw new Error('Previous evidence lacks a valid merge-check snapshot');
+    evidence.requiredChecksAtMerge = savedChecks;
+    evidence.mergeRequirementsVerified = true;
+  }
+  evidence.newReviewActivity = newReviewActivity(evidence, previous);
+}
 export function newReviewActivity(current, previous) {
   const knownComments = new Map(
     previous.pr.reviewThreads.nodes
@@ -225,23 +253,14 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     throw new Error('Completion requires --previous for the matching premerge observation');
   const evidence = await collect(number);
   evidence.reviewConfirmation = { head: values['reviewed-head'], note: values['review-note'] };
-  if (values.previous) {
-    const previous = JSON.parse(await readFile(values.previous, 'utf8'));
-    if (
-      previous.repository !== evidence.repository ||
-      previous.pr.headRefOid !== evidence.pr.headRefOid ||
-      previous.pr.url !== evidence.pr.url
-    )
-      throw new Error('Previous evidence must belong to the same PR and reviewed head');
-    const savedChecks = previous.requiredChecksAtMerge || previous.requiredChecks;
-    if (
-      !Array.isArray(savedChecks) ||
-      savedChecks.some((name) => typeof name !== 'string' || !name)
-    )
-      throw new Error('Previous evidence lacks a valid merge-check snapshot');
-    evidence.requiredChecksAtMerge = savedChecks;
-    evidence.newReviewActivity = newReviewActivity(evidence, previous);
-  }
+  evidence.phase = values.phase;
+  if (values.phase === 'premerge') evidence.requiredChecksAtMerge = evidence.requiredChecks;
+  if (values.previous)
+    applyPreviousObservation(
+      evidence,
+      JSON.parse(await readFile(values.previous, 'utf8')),
+      values.phase,
+    );
   evidence.problems = releaseProblems(evidence, {
     phase: values.phase,
     reviewedHead: values['reviewed-head'],
