@@ -1,0 +1,17 @@
+{
+  "id": "canada-1949",
+  "status": "approved-reference",
+  "reviewer": "Codex, under Nicolas's bounded reference-review authorization",
+  "authority": "Owner selected partial Canada 1949 reference coverage and authorized bounded reference approval, an explicit 1776 gap, and delivery in this implementation session on 2026-10-02.",
+  "inputSha256": "24aca59a2894b0e080ae79f7c790d1137dc95b99ce17c7b963bb046dcfb167ec",
+  "reviewedOn": "2026-10-02",
+  "representation": "legal-affiliation",
+  "reason": "Approve the official generalized annual post-entry reference only. NRCan attribution/license and 1949 grouping, legal membership/1927 extent, interior ownership checks, ring validation, dissolution and visual review support this limited grade. Independent historical boundary validation, effective control and exact-day geometry remain unverified.",
+  "evidence": ["newfoundland-union-date", "newfoundland-union-legal", "canada-1949-source-scope"],
+  "judgmentRecords": [
+    "research/jev-historical-slice-records.json",
+    "research/jev-labrador-review-records.json"
+  ],
+  "transformation": "Fetch official unsimplified divisions, dissolve to national outline, then simplify rings at 0.03 degrees retaining selected boundary points. Preserve small islands and holes.",
+  "conflicts": []
+}

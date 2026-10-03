@@ -93,3 +93,20 @@ export interface BoundaryEvent {
   beforeStateIds: string[];
   afterStateIds: string[];
 }
+
+export interface CoverageRequest {
+  time?: number;
+  regions?: string[];
+  representation?: string;
+  layers?: string[];
+  precision?: 'year' | 'day';
+  revision?: string;
+}
+export interface CoverageResolution {
+  states: BoundaryState[];
+  status: 'covered' | 'partial' | 'gap' | 'error';
+  missingRegions: string[];
+  missingLayers: string[];
+  conflicts: string[];
+  reason?: string;
+}

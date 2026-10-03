@@ -1,5 +1,6 @@
 import { assetUrl } from './urls';
 import { createAssetLoader } from './asset-loader.mjs';
+import { resolveCoverage, availableMoments, adjacentAvailableMoment } from './coverage.mjs';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Globe2,
@@ -27,11 +28,11 @@ import {
   END_YEAR,
   clampYear,
   snapshotForYear,
-  adjacentSnapshot,
   advanceTime,
   nearestSnapshot,
 } from './timeline.mjs';
 
+const EMPTY_TERRITORIES: Territory[] = [];
 const SPEEDS = [0.5, 1, 4, 12];
 const formatYear = (year: number) => String(Math.floor(year));
 
@@ -43,6 +44,8 @@ export default function App() {
   const [yearDraft, setYearDraft] = useState('1880');
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState(1);
+  const [representation, setRepresentation] = useState('all-supported');
+  const [region, setRegion] = useState('north-america');
   const [borders, setBorders] = useState(true);
   const [panel, setPanel] = useState<'sources' | 'layers' | 'help' | null>(null);
   const [focus, setFocus] = useState<string | null>(null);
@@ -50,7 +53,6 @@ export default function App() {
   const [resetToken, setResetToken] = useState(0);
   const [ready, setReady] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [loadedYear, setLoadedYear] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const loader = useRef(createAssetLoader({ urlFor: assetUrl }));
   const [bootAttempt, setBootAttempt] = useState(0);
@@ -62,15 +64,36 @@ export default function App() {
     () => (manifest ? snapshotForYear(manifest.snapshots, year) : null),
     [manifest, Math.floor(year)],
   );
-  const states = useMemo(
-    () =>
-      manifest?.states.filter(
-        (s) => s.time.kind === 'snapshot' && s.time.year === Math.floor(year),
-      ) ?? [],
-    [manifest, Math.floor(year)],
+  const coverageRequest = useMemo(
+    () => ({
+      regions: [region],
+      representation,
+      layers: [
+        representation === 'effective-control'
+          ? 'control'
+          : representation === 'territorial-claim'
+            ? 'claims'
+            : representation === 'dispute'
+              ? 'dispute'
+              : 'political',
+      ],
+    }),
+    [region, representation],
+  );
+  const coverage = useMemo(
+    () => (manifest ? resolveCoverage(manifest, { ...coverageRequest, time: year }) : null),
+    [manifest, coverageRequest, year],
+  );
+  const stateIds = coverage?.states.map((state) => state.id).join(',') ?? '';
+  const states = useMemo(() => coverage?.states ?? [], [manifest, stateIds]);
+  const coverageFailure = coverage?.status === 'error' ? coverage.reason : null;
+  const hasCoverage = states.length > 0;
+  const available = useMemo(
+    () => (manifest ? availableMoments(manifest, coverageRequest) : []),
+    [manifest, coverageRequest],
   );
   const selectionKey = `${manifest?.revision ?? ''}:${states.map((s) => s.id).join(',')}`;
-  const visibleTerritories = loadedKey === selectionKey ? territories : [];
+  const visibleTerritories = loadedKey === selectionKey ? territories : EMPTY_TERRITORIES;
   const yearInteger = Math.floor(year);
   useEffect(() => setYearDraft(String(yearInteger)), [yearInteger]);
   useEffect(() => {
@@ -106,8 +129,13 @@ export default function App() {
     setFocus(null);
     setError(null);
     setTerritories([]);
-    setLoadedYear(null);
     setLoadedKey('');
+    if (coverageFailure) {
+      setError(coverageFailure);
+      setLoading(false);
+      setPlaying(false);
+      return () => abort.abort();
+    }
     if (!states.length) {
       setLoading(false);
       return () => abort.abort();
@@ -118,7 +146,6 @@ export default function App() {
       .then((features) => {
         if (abort.signal.aborted) return;
         setTerritories(features);
-        setLoadedYear(Math.floor(year));
         setLoadedKey(selectionKey);
         setLoading(false);
       })
@@ -129,7 +156,7 @@ export default function App() {
         setPlaying(false);
       });
     return () => abort.abort();
-  }, [manifest, states, selectionKey]);
+  }, [manifest, states, selectionKey, coverageFailure]);
   useEffect(() => {
     if (!playing || loading || !ready) return;
     let frame: number;
@@ -161,10 +188,10 @@ export default function App() {
   const step = useCallback(
     (direction: number) => {
       if (!manifest) return;
-      const next = adjacentSnapshot(manifest.snapshots, yearRef.current, direction);
+      const next = adjacentAvailableMoment(manifest, yearRef.current, direction, coverageRequest);
       if (next !== null) seek(next);
     },
-    [manifest, seek],
+    [manifest, coverageRequest, seek],
   );
   const togglePlayback = useCallback(() => {
     if (error || !ready || loading) return;
@@ -220,9 +247,10 @@ export default function App() {
       .sort((a, b) => order.indexOf(a.properties.id) - order.indexOf(b.properties.id));
   }, [visibleTerritories]);
   const progress = ((year - START_YEAR) / (END_YEAR - START_YEAR)) * 100;
-  const available = manifest?.snapshots.map((s) => s.year) ?? [];
-  const previousDisabled = !manifest || adjacentSnapshot(manifest.snapshots, year, -1) === null;
-  const nextDisabled = !manifest || adjacentSnapshot(manifest.snapshots, year, 1) === null;
+  const previousDisabled =
+    !manifest || adjacentAvailableMoment(manifest, year, -1, coverageRequest) === null;
+  const nextDisabled =
+    !manifest || adjacentAvailableMoment(manifest, year, 1, coverageRequest) === null;
   const currentSources =
     manifest?.sources.filter((s) =>
       visibleTerritories.some((f) => f.properties.sourceId === s.id),
@@ -231,11 +259,11 @@ export default function App() {
     <main
       className="app"
       data-playing={playing}
-      data-loaded-year={loadedKey === selectionKey ? (loadedYear ?? '') : ''}
+      data-loaded-year={hasCoverage && loadedKey === selectionKey ? yearInteger : ''}
       data-loading={loading}
       data-error={error ?? ''}
       data-year={yearInteger}
-      data-coverage={error ? 'error' : loading ? 'loading' : snapshot ? 'partial' : 'gap'}
+      data-coverage={error ? 'error' : loading ? 'loading' : (coverage?.status ?? 'gap')}
     >
       <header className="topbar">
         <a className="brand" href={assetUrl('')} aria-label="World Borders home">
@@ -277,17 +305,17 @@ export default function App() {
             <span>CE</span>
           </div>
           <div className="coverage-status">
-            <span className={snapshot ? 'status-dot' : 'status-dot dim'} />
+            <span className={hasCoverage ? 'status-dot' : 'status-dot dim'} />
             {error
               ? 'Borders unavailable — load error'
               : loading
                 ? 'Loading borders'
-                : snapshot
-                  ? 'Reference snapshot · partial coverage'
+                : hasCoverage
+                  ? `${states.some((s) => s.time.kind === 'interval') ? 'Evidenced interval' : states.some((s) => s.representation === 'legal-affiliation') ? 'Legal affiliation · post-entry 1949 reference' : 'Reference snapshot'}${coverage?.status === 'partial' ? ' · partial coverage' : ''}`
                   : 'No snapshot for this year'}
           </div>
           <div className="date-rule" />
-          {snapshot && !loading && !error && loadedKey === selectionKey && (
+          {hasCoverage && !loading && !error && loadedKey === selectionKey && (
             <>
               <div className="legend-title">TERRITORIES</div>
               <div className="territory-legend">
@@ -312,11 +340,14 @@ export default function App() {
               )}
             </>
           )}
-          {!snapshot && !loading && !error && manifest && (
+          {!hasCoverage && !loading && !error && manifest && (
             <button
               className="nearest-button"
               onClick={() => {
-                const next = nearestSnapshot(manifest.snapshots, year);
+                const next = nearestSnapshot(
+                  available.map((year) => ({ year })),
+                  year,
+                );
                 if (next !== null) seek(next);
               }}
             >
@@ -415,7 +446,7 @@ export default function App() {
               }
             }}
             aria-label="Timeline year"
-            aria-valuetext={`${yearInteger}${snapshot ? ', sourced snapshot' : ', no snapshot available'}`}
+            aria-valuetext={`${yearInteger}${hasCoverage ? ', published boundary state' : ', no state available'}`}
           />
           <div className="timeline-labels">
             {[1776, 1800, 1850, 1900, 1950, 2000, 2026].map((y) => (
@@ -547,26 +578,66 @@ export default function App() {
               <div className="data-notice">
                 <Info size={16} />
                 <p>
-                  1880 Canada and Newfoundland use official historical polygons. Other territories
-                  use generalized reference geometry and still need independent boundary review.
-                  Early colonial shapes represent claims, not established effective control.
+                  1880 Canada/Newfoundland and partial Canada 1949 use official historical polygons.
+                  Other territories use generalized reference geometry and still need independent
+                  boundary review. Early colonial shapes represent claims, not established effective
+                  control.
                 </p>
               </div>
-              {snapshot && (
+              {hasCoverage && (
                 <div className="current-snapshot">
-                  <h3>Current snapshot · {snapshot.year}</h3>
+                  <h3>Current state · {yearInteger}</h3>
                   <p>{currentSources.map((s) => s.name).join(' + ') || 'Loading source details'}</p>
+                  <p>
+                    Coverage: {coverage?.status}. Missing or incomplete regions:{' '}
+                    {coverage?.missingRegions.join(', ') || 'none'}. Missing layers:{' '}
+                    {coverage?.missingLayers.join(', ') || 'none'}.
+                  </p>
                   {states.map((s) => (
                     <p key={s.id}>
                       {manifest?.polities.find((p) => p.id === s.polityId)?.name}: {s.review} ·{' '}
-                      {s.representation}. {s.limitations.join(' ')}
+                      {s.representation}. {s.limitations.join(' ')} Curator:{' '}
+                      {s.disposition.reviewer}. {s.disposition.reason}
                     </p>
                   ))}
-                  {snapshot.corrections.map((c) => (
+                  {snapshot?.corrections.map((c) => (
                     <p key={c}>{c}</p>
                   ))}
                 </div>
               )}
+              {manifest?.events.map((event) => (
+                <div className="current-snapshot" key={event.id}>
+                  <h3>{event.name}</h3>
+                  <p>
+                    Event date:{' '}
+                    {event.precision === 'day'
+                      ? new Intl.DateTimeFormat('en', {
+                          day: 'numeric',
+                          month: 'long',
+                          year: 'numeric',
+                          timeZone: 'UTC',
+                        }).format(
+                          new Date(
+                            Date.UTC(event.date.year, event.date.month! - 1, event.date.day!),
+                          ),
+                        )
+                      : event.date.year}
+                    . Exact-day geometry is unavailable; before/after references are sparse annual
+                    snapshots.
+                  </p>
+                  {event.evidenceIds.map((id) => {
+                    const evidence = manifest.evidence.find((e) => e.id === id);
+                    const source = manifest.sources.find((s) => s.id === evidence?.sourceId);
+                    return source && evidence ? (
+                      <p key={id}>
+                        <a href={source.url} target="_blank" rel="noreferrer">
+                          {evidence.text}
+                        </a>
+                      </p>
+                    ) : null;
+                  })}
+                </div>
+              ))}
               {manifest?.sources.map((s) => (
                 <a key={s.id} className="source-card" href={s.url} target="_blank" rel="noreferrer">
                   <div>
@@ -594,6 +665,45 @@ export default function App() {
           {panel === 'layers' && (
             <>
               <h2>Layers</h2>
+              <div className="layer-row">
+                <label>
+                  Region{' '}
+                  <select
+                    aria-label="Coverage region"
+                    value={region}
+                    onChange={(e) => {
+                      setPlaying(false);
+                      setRegion(e.target.value);
+                    }}
+                  >
+                    <option value="north-america">North America</option>
+                    <option value="canada-newfoundland">Canada &amp; Newfoundland</option>
+                  </select>
+                </label>
+              </div>
+              <div className="layer-row">
+                <label>
+                  Representation{' '}
+                  <select
+                    aria-label="Boundary representation"
+                    value={representation}
+                    onChange={(e) => {
+                      setPlaying(false);
+                      setRepresentation(e.target.value);
+                    }}
+                  >
+                    <option value="all-supported">Published political sources</option>
+                    <option value="source-political">Source political reference</option>
+                    <option value="legal-affiliation">Legal affiliation</option>
+                    <option value="effective-control">Effective control</option>
+                    <option value="territorial-claim">Territorial claims</option>
+                    <option value="dispute">Disputes</option>
+                  </select>
+                </label>
+              </div>
+              {!hasCoverage && (
+                <p>No published geometry for this region and representation at {yearInteger}.</p>
+              )}
               <div className="layer-row">
                 <div>
                   <h3>Territorial borders</h3>

@@ -25,11 +25,20 @@ Fontsource (DM Sans and Manrope, SIL Open Font License).
 - Author: Natural Resources Canada / Government of Canada.
 - License: [Open Government Licence – Canada](https://open.canada.ca/en/open-government-licence-canada).
 - Service: [Political Divisions, layer 8](https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/territorial_evolution_en/MapServer/8).
-- File: Canada and Newfoundland features in `snapshot-1880.geojson`.
+- Files: Canada/Newfoundland in `snapshot-1880.geojson` and Canada in `snapshot-1949.geojson`.
 - Modifications: query the 1880 records in EPSG:4326; request 0.03-degree server
   simplification; dissolve provincial divisions within each political grouping;
   add display/source metadata. This is generalized official historical geometry,
   not a survey-grade boundary or an assertion about day-by-day control.
+- For 1949: request all fourteen divisions without service simplification
+  (`maxAllowableOffset=0`), dissolve the national outline, then simplify rings
+  at 0.03 degrees using Douglas–Peucker and retained boundary points. Small
+  rings remain intact. Simplifying provinces separately created seams and was rejected.
+- The 1949 snapshot is an annual post-entry **legal-affiliation reference**,
+  including Newfoundland/Labrador. US/Mexico remain unavailable. It is not
+  effective-control reconstruction, independently validated boundaries, a
+  full-year interval or March 31 day-valid geometry.
+- Contains information licensed under the Open Government Licence – Canada.
 - This application is not endorsed by the Government of Canada.
 
 ## Natural Earth
@@ -67,3 +76,18 @@ Snapshot files describe only the selected calendar year. No validity interval is
 inferred from spacing between snapshots. Coverage from 1776 through the present,
 fully vetted geometry, effective-control reconstruction and dispute overlays are
 not yet complete.
+
+## Publication disposition and research
+
+The owner authorized bounded reference review and an explicit 1776 gap. The
+[Canada1949 disposition](data/curation/canada-1949.json) binds approval to the exact
+source SHA-256; changed inputs, unknown licensing or unresolved conflicts require
+new review. Reference approval does not confer independently verified status.
+The [research](research/HISTORICAL_SLICE_RESEARCH.md),
+[initial Jev ledger](research/jev-historical-slice-records.json) and
+[Labrador extent ledger](research/jev-labrador-review-records.json) retain cited
+passages, hashes, real judgments and held outcomes. The
+[Terms of Union](https://www.legislation.gov.uk/ukpga/Geo6/12-13-14/22/enacted)
+establish legal affiliation and the 1927 extent; the separately recorded March 31
+event does not validate polygon coordinates. The Declaration supplies no 1776
+polygons; neither 1715 nor 1783 is backcast to fill the gap.

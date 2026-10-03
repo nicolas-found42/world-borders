@@ -110,3 +110,15 @@ test('Data has explicit provenance, closed finite rings, and no NC-required sour
     }
   }
 });
+
+test('the partial 1949 reference assigns Newfoundland and Labrador to Canada without US or Mexico carryover', () => {
+  assert(contains(1949, 'canada', [-56, 48.8]));
+  assert(contains(1949, 'canada', [-60.41, 53.3]));
+  assert(contains(1949, 'canada', [-75.69, 45.42]));
+  assert(!contains(1949, 'canada', [-74, 40.71]));
+  assert(!contains(1949, 'canada', [-99.13, 19.43]));
+  assert.deepEqual(
+    snapshots.get(1949).features.map((f) => f.properties.id),
+    ['canada'],
+  );
+});

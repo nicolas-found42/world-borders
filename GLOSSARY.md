@@ -36,3 +36,9 @@ A typed Jev answer with probabilities, versioned inputs, and a recorded disposit
 
 **Curator disposition**:
 A recorded decision on a boundary state’s publication eligibility, including scope, limitations, and unresolved conflicts.
+
+**Legal affiliation**:
+Membership or territorial status established by a legal instrument. It does not by itself establish effective control or precise boundary coordinates.
+
+**Reference approval**:
+A curator’s permission to publish a named source and representation with stated limitations, while independent historical boundary validation remains incomplete.

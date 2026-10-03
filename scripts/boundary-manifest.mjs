@@ -12,7 +12,10 @@ export function boundaryManifest(manifest, collections) {
         file: snapshot.file,
         sourceIds: [p.sourceId],
         inputs: snapshot.inputs,
-        regions: ['north-america'],
+        regions: [
+          'north-america',
+          ['canada', 'newfoundland'].includes(p.id) ? 'canada-newfoundland' : p.id,
+        ],
         coverage: 'partial',
         representation: 'source-political',
         time: { kind: 'snapshot', year: snapshot.year, precision: 'year' },

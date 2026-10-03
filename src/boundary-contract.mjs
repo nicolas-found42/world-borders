@@ -51,7 +51,8 @@ export function validateGeometry(data, { territories = false } = {}) {
         for (const point of ring)
           requireValue(
             Array.isArray(point) &&
-              point.length >= 2 &&
+              [2, 3].includes(point.length) &&
+              point.every(Number.isFinite) &&
               Number.isFinite(point[0]) &&
               Number.isFinite(point[1]) &&
               Math.abs(point[0]) <= 180.001 &&
@@ -191,6 +192,13 @@ export function validateManifest(data) {
           'year precision interval',
         );
     }
+    if (time.kind === 'snapshot')
+      requireValue(
+        data.snapshots.some(
+          (snapshot) => snapshot.year === time.year && snapshot.file === state.file,
+        ),
+        'snapshot/state time or file mismatch',
+      );
     const d = state.disposition;
     requireValue(
       d &&
@@ -222,6 +230,16 @@ export function validateManifest(data) {
         'reference approval needs evidence',
       );
   }
+  for (const snapshot of data.snapshots)
+    requireValue(
+      data.states.some(
+        (state) =>
+          state.time.kind === 'snapshot' &&
+          state.time.year === snapshot.year &&
+          state.file === snapshot.file,
+      ),
+      'snapshot has no boundary states',
+    );
   for (const event of data.events) {
     requireValue(
       text(event.name) &&

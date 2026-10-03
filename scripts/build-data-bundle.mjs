@@ -1,6 +1,8 @@
-import { mkdir, writeFile, rm } from 'node:fs/promises';
+import { mkdir, writeFile, readFile, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fetchSource } from './source-cache.mjs';
+import { canada1949Url, addCanada1949 } from './canada-1949.mjs';
+import { validateManifest } from '../src/boundary-contract.mjs';
 import { boundaryManifest } from './boundary-manifest.mjs';
 import { union } from '@turf/union';
 import { featureCollection } from '@turf/helpers';
@@ -184,43 +186,44 @@ export async function buildBundle({ cacheDir, outputDir, refresh }) {
       note: 'Independent check that Newfoundland is separate from Canada in 1880 and 1938, and part of Canada in 1960 and 2010.',
     },
   ];
-  await writeFile(
-    join(outputDir, 'manifest.json'),
-    JSON.stringify(
-      boundaryManifest(
+  const manifest = boundaryManifest(
+    {
+      schemaVersion: 1,
+      range: [1776, 2026],
+      snapshots,
+      sources,
+      landInput: { url: land.url, sha256: land.hash },
+      excludedSnapshots: [
         {
-          schemaVersion: 1,
-          range: [1776, 2026],
-          snapshots,
-          sources,
-          landInput: { url: land.url, sha256: land.hash },
-          excludedSnapshots: [
-            {
-              years: [1783, 1800, 1815],
-              reason:
-                'Containment checks put Jacksonville, Florida within the United States before the 1821 transfer. No repaired historical geometry available.',
-              evidence: 'https://history.state.gov/milestones/1801-1829/florida',
-            },
-            {
-              years: [1815, 1900],
-              reason:
-                'Containment checks put Newfoundland within Canada before its 1949 entry. No verified same-year replacement available.',
-              evidence:
-                'https://parks.canada.ca/culture/designation/evenement-event/terre-neuve-confederation-newfoundland',
-            },
-          ],
-          limitations: [
-            'Four snapshot years, not continuous historical coverage. Other years deliberately have no territorial polygons.',
-            'Only the 1880 Canada/Newfoundland geometry is drawn from a government historical polygon service. Other historical shapes are generalized source references, not fully vetted boundaries.',
-            'Early colonial claims are not effective control. Indigenous territories are not yet mapped; neutral areas do not imply uninhabited or unclaimed land.',
-            'A complete disputed-boundary layer is not yet available. No disputed areas are invented.',
-            'Nearby island and predecessor coverage is incomplete. Overseas dependencies are outside this pilot.',
-          ],
+          years: [1783, 1800, 1815],
+          reason:
+            'Containment checks put Jacksonville, Florida within the United States before the 1821 transfer. No repaired historical geometry available.',
+          evidence: 'https://history.state.gov/milestones/1801-1829/florida',
         },
-        collections,
-      ),
-      null,
-      2,
-    ),
+        {
+          years: [1815, 1900],
+          reason:
+            'Containment checks put Newfoundland within Canada before its 1949 entry. No verified same-year replacement available.',
+          evidence:
+            'https://parks.canada.ca/culture/designation/evenement-event/terre-neuve-confederation-newfoundland',
+        },
+      ],
+      limitations: [
+        'Four snapshot years, not continuous historical coverage. Other years deliberately have no territorial polygons.',
+        'Only the 1880 Canada/Newfoundland geometry is drawn from a government historical polygon service. Other historical shapes are generalized source references, not fully vetted boundaries.',
+        'Early colonial claims are not effective control. Indigenous territories are not yet mapped; neutral areas do not imply uninhabited or unclaimed land.',
+        'A complete disputed-boundary layer is not yet available. No disputed areas are invented.',
+        'Nearby island and predecessor coverage is incomplete. Overseas dependencies are outside this pilot.',
+      ],
+    },
+    collections,
   );
+  const source1949 = await cached('canada-1949-full.geojson', canada1949Url);
+  const review = JSON.parse(
+    await readFile(new URL('../data/curation/canada-1949.json', import.meta.url), 'utf8'),
+  );
+  const slice = addCanada1949(manifest, source1949, review);
+  validateManifest(slice.manifest);
+  await writeFile(join(outputDir, 'snapshot-1949.geojson'), JSON.stringify(slice.collection));
+  await writeFile(join(outputDir, 'manifest.json'), JSON.stringify(slice.manifest, null, 2));
 }
