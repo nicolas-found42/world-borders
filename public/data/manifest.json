@@ -799,7 +799,7 @@
         "Annual source depicts Canada after Newfoundland’s entry; the March 31 event does not establish day-valid geometry or an interval.",
         "US and Mexico geometry for 1949 is unavailable. Nearby-island, Indigenous and disputed-boundary coverage remains incomplete.",
         "Official generalized reference geometry, not independent historical boundary validation or effective-control evidence.",
-        "Unsimplified official divisions dissolved, then Douglas–Peucker simplification starting at 0.03 degrees with finer or unsimplified fallback until topology normalization preserves every component, hole and ring boundary. Selected tolerance is recorded on the asset; source boundary points are retained. Government of Canada does not endorse this application."
+        "Unsimplified official divisions dissolved, then Douglas–Peucker simplification starting at 0.03 degrees with finer or unsimplified fallback until topology normalization preserves every component, hole and ring boundary. Selected tolerance: 0.01 degrees; source boundary points are retained. Government of Canada does not endorse this application."
       ],
       "disposition": {
         "status": "approved-reference",
@@ -865,7 +865,7 @@
       ]
     }
   ],
-  "revision": "6a06902059b50f561b2d3bdbe6db61383c07e5385e0b12a61739d164db720f69",
+  "revision": "1cfbbed2dbdc5ad60613da74c4a274eb003ababc11813bd21389204264048e0b",
   "assetDigests": {
     "snapshot-1880.geojson": "55513b2ec2be8dd012a5e603236337f4c9d952a29471bf4559254ddb3d0f8eec",
     "snapshot-1938.geojson": "a97572cd81a5f6239c6adfc075cfc2317f727e1738776128a6e1c9f6557efbe6",

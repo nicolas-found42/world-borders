@@ -71,3 +71,25 @@ test('simplification cannot connect separate components from the official input'
   const normalized = union(featureCollection([feature, feature]));
   assert.equal(topologySignature(selected.geometry), topologySignature(normalized.geometry));
 });
+
+test('topology identity preserves exterior and hole roles', async () => {
+  const { topologySignature } = await import('../scripts/canada-1949.mjs');
+  const outer = [
+    [0, 0],
+    [4, 0],
+    [4, 4],
+    [0, 4],
+    [0, 0],
+  ];
+  const hole = [
+    [1, 1],
+    [2, 1],
+    [2, 2],
+    [1, 2],
+    [1, 1],
+  ];
+  assert.notEqual(
+    topologySignature({ type: 'Polygon', coordinates: [outer, hole] }),
+    topologySignature({ type: 'Polygon', coordinates: [hole, outer] }),
+  );
+});

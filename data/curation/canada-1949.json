@@ -14,6 +14,6 @@
   ],
   "transformation": "Fetch official unsimplified divisions, dissolve to national outline, then simplify rings starting at 0.03 degrees, falling back to finer or unsimplified geometry until self-union preserves canonical component, hole and ring boundaries. Record the selected tolerance and retain source boundary points. Preserve small islands and holes.",
   "conflicts": [],
-  "publicationSha256": "4760f63ac8bc0b8dbbffb1fb4e58fd723a044f0a4db101ca97e6a97ec81691f3",
+  "publicationSha256": "cfb4a820de2a1f597f35746de3d2d34604ce0947412a64f9ea3d4dbfe63a8fac",
   "outputSha256": "c0b406d8328d53c0fdebf54a0811c6a3d01ebed9b9d98a50bda9dad9852ec4ac"
 }

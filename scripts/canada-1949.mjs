@@ -46,7 +46,10 @@ function canonicalRing(ring) {
 }
 export function topologySignature(geometry) {
   return polygonParts(geometry)
-    .map((polygon) => polygon.map(canonicalRing).sort().join('|'))
+    .map(
+      (polygon) =>
+        `${canonicalRing(polygon[0])}|${polygon.slice(1).map(canonicalRing).sort().join('|')}`,
+    )
     .sort()
     .join('||');
 }
@@ -169,7 +172,10 @@ export function addCanada1949(manifest, source, record) {
       'Annual source depicts Canada after Newfoundland’s entry; the March 31 event does not establish day-valid geometry or an interval.',
       'US and Mexico geometry for 1949 is unavailable. Nearby-island, Indigenous and disputed-boundary coverage remains incomplete.',
       'Official generalized reference geometry, not independent historical boundary validation or effective-control evidence.',
-      'Unsimplified official divisions dissolved, then Douglas–Peucker simplification starting at 0.03 degrees with finer or unsimplified fallback until topology normalization preserves every component, hole and ring boundary. Selected tolerance is recorded on the asset; source boundary points are retained. Government of Canada does not endorse this application.',
+      'Unsimplified official divisions dissolved, then Douglas–Peucker simplification starting at 0.03 degrees with finer or unsimplified fallback until topology normalization preserves every component, hole and ring boundary. Selected tolerance is recorded on the asset; source boundary points are retained. Government of Canada does not endorse this application.'.replace(
+        'Selected tolerance is recorded on the asset',
+        `Selected tolerance: ${collection.simplificationDegrees} degrees`,
+      ),
     ],
   };
   const transformation =
