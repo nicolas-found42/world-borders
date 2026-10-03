@@ -1,0 +1,53 @@
+# Research: first publishable North America historical slice
+
+**Prepared:** 2026-10-02  
+**Scope:** licensing and source readiness for the required 1776 starting date and a candidate Newfoundland-to-Canada 1949 event. This is a source and geometry feasibility review, not a boundary approval.
+
+## Findings
+
+The repository already treats the timeline start and available snapshots separately: the range begins in 1776, while its published snapshots are 1880, 1938, 1960, and 2010. The resolver returns no state for unsupported years, and the manifest labels each existing record `snapshot-year-only`. [SPEC.md](../SPEC.md), [manifest.json](../public/data/manifest.json), and [timeline.mjs](../src/timeline.mjs) therefore support a visible 1776 coverage gap without carrying later geometry backward.
+
+The 1776 date has primary documentary support as the adoption date of the Declaration and its assertion that the thirteen colonies are free and independent states. The National Archives transcription supplies no boundary coordinates or polygon. It does not establish an agreed boundary, continuous effective control, or the status of all North American territory. A source-backed date is not a geometry source. [National Archives transcription](https://www.archives.gov/founding-docs/declaration-transcript)
+
+The current upstream Historical Basemaps index has no 1776 entry. It lists a 1715 map with “British American colonies” and “Viceroyalty of New Spain,” then 1783 and later entries; direct 1775 and 1776 GeoJSON paths return 404. Its README calls the maps work in progress and says to verify them against other sources before use; its repository LICENSE is GPL-3.0. Its 1783 map cannot be used as a 1776 state or interpolated to one. This repo already excludes 1783 because a containment check puts Jacksonville inside the United States before the documented 1821 Florida transfer. [Upstream index](https://raw.githubusercontent.com/aourednik/historical-basemaps/master/index.json), [upstream README](https://github.com/aourednik/historical-basemaps#historical-boundaries-of-world-countries-and-cultural-regions), [upstream license](https://github.com/aourednik/historical-basemaps/blob/master/LICENSE), [1783 file path](https://raw.githubusercontent.com/aourednik/historical-basemaps/master/geojson/world_1783.geojson), [manifest exclusions](../public/data/manifest.json).
+
+**Recommendation for 1776:** retain 1776 as the timeline origin, with a gap and neutral physical land, until a curator approves a specific representation and reviews its geometry. A 1776 claim layer could be considered only with source evidence and separately labeled claim geometry. Do not present the Declaration itself, the 1715 or 1783 map, or modern land as an effective-control boundary for 1776. The consequential product choice is whether “starting state” means a date on the timeline or a fully populated North America map. The latter is not supported by the sources found here.
+
+A candidate 1949 Newfoundland state is substantially more feasible. The UK British North America Act 1949 Schedule, Terms of Union, says Newfoundland forms part of Canada from the coming into force of the Terms. It describes the province as Newfoundland Island and adjacent islands, the Labrador coast as delimited in the 1927 Privy Council report, and adjacent Labrador islands. The Act received assent on 23 March 1949; that enactment date must not be mistaken for the date of Union. Parks Canada states that Newfoundland entered Confederation on 31 March 1949. Preserve the latter as an exact event date with the Parks Canada citation, and keep the geometry precision at year 1949. [British North America Act 1949, enacted text](https://www.legislation.gov.uk/ukpga/Geo6/12-13-14/22/enacted), [Parks Canada event record](https://parks.canada.ca/culture/designation/evenement-event/terre-neuve-confederation-newfoundland)
+
+Natural Resources Canada’s [Territorial Evolution of Canada, 1867 to 2003](https://open.canada.ca/data/en/dataset/e88ce995-b69a-4595-a752-bb06b061b5a3) is an official historical political-boundary dataset. Its English ArcGIS REST layer 8 query for `START_TIME=1949` returns a `Newfoundland` feature in `Period_Group=Canada (1949)`; a feature-filtered geometry query returns a GeoJSON MultiPolygon for Newfoundland with a requested 4326 coordinate reference and `maxAllowableOffset=0.03` degrees. The source is generalized and is not survey-grade. The Portal lists the dataset under the Open Government Licence – Canada. [English layer 8](https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/territorial_evolution_en/MapServer/8), [1949 attribute query](https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/territorial_evolution_en/MapServer/8/query?where=START_TIME%3D1949&outFields=PROV_NAME%2CSTART_TIME%2CEND_TIME%2CPeriod_Group&returnGeometry=false&resultRecordCount=200&f=pjson), [filtered 1949 Newfoundland GeoJSON query](https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/territorial_evolution_en/MapServer/8/query?where=START_TIME%3D1949%20AND%20PROV_NAME%3D%27Newfoundland%27&outFields=PROV_NAME%2CSTART_TIME%2CEND_TIME%2CPeriod_Group&outSR=4326&maxAllowableOffset=0.03&returnGeometry=true&f=geojson), [OGL – Canada](https://open.canada.ca/en/open-government-licence-canada)
+
+The OGL – Canada page grants worldwide, royalty-free, perpetual, non-exclusive use, including commercial use, and allows copying, modifying, publishing, adapting, and distributing the information. It requires source attribution and, where possible, a link to the licence; it disclaims endorsement and warranties and excludes third-party rights the provider is not authorized to license. This supports reuse of the NRCan geometry with required attribution and the repo’s non-endorsement notice. Confirm the layer’s terms on the release date and retain the source response/hash in the build provenance. [OGL – Canada, version 2.0](https://open.canada.ca/en/open-government-licence-canada)
+
+The geometry is a calendar-year snapshot. Its 1949 source attributes do not establish a 31 March day boundary or a validity interval. Store the event date as 1949-03-31 (day precision, sourced to Parks Canada), while the geometric state remains a 1949 annual snapshot. Do not infer validity before or after that snapshot. The official dataset groups all Canadian political divisions for 1949 and is a source candidate for dissolving internal provincial/territorial boundaries, but the published province geometry should be checked against the legal extent in Term 2 and the referenced 1927 Labrador report before release.
+
+This source only addresses Canada. It cannot by itself support a complete North America 1949 snapshot with contemporaneous US and Mexico geometry. A Newfoundland transfer event or explicitly partial Canada 1949 state is feasible; a complete continental state requires separately sourced 1949 US and Mexico geometry and review. Do not fill those areas from 1938, 1960, or 2010 snapshots.
+
+## Curator decisions and release gates
+
+- Decide whether the 1776 requirement is satisfied by a timeline start with an explicit coverage gap, or whether a 1776 geometry layer is a release blocker. If geometry is required, decide whether the intended representation is claim, effective control, or separate assertions; each requires a source-specific geometry review.
+- Decide whether a partial Canadian 1949 state is useful, or defer display until contemporaneous US and Mexico geometry is available.
+- Before publishing the NRCan feature, review the Newfoundland/Labrador extent, islands, topology, and source points against the Terms of Union and 1927 boundary description. Record the geometry as generalized official political-boundary geometry; do not upgrade it to complete effective-control verification based only on a government origin.
+- Keep the event date and geometry date precision separate: 31 March 1949 for entry; year-only 1949 for the mapped state. No interval should be added without evidence.
+- Preserve Open Government Licence – Canada attribution, licence link, source provider credit, modification/simplification record, exact request URL, and raw-input SHA-256. State that the data is not endorsed by the Government of Canada.
+
+## Sources and local context
+
+Primary/documentary sources:
+
+- [National Archives, Declaration of Independence transcription](https://www.archives.gov/founding-docs/declaration-transcript)
+- [British North America Act 1949, as enacted](https://www.legislation.gov.uk/ukpga/Geo6/12-13-14/22/enacted)
+- [Parks Canada, Newfoundland’s entry into Confederation](https://parks.canada.ca/culture/designation/evenement-event/terre-neuve-confederation-newfoundland) — official government event record for the 31 March date; the Act remains the legal source for the Terms and territory.
+- [Natural Resources Canada dataset entry](https://open.canada.ca/data/en/dataset/e88ce995-b69a-4595-a752-bb06b061b5a3) and [English REST service layer](https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/territorial_evolution_en/MapServer/8)
+- [Open Government Licence – Canada](https://open.canada.ca/en/open-government-licence-canada)
+- [Historical Basemaps index](https://raw.githubusercontent.com/aourednik/historical-basemaps/master/index.json), [README](https://github.com/aourednik/historical-basemaps), [GPL-3.0 license](https://github.com/aourednik/historical-basemaps/blob/master/LICENSE)
+
+Local project facts read for this research:
+
+- [SPEC.md](../SPEC.md) requires a 1776 timeline start, gaps for unsupported years, and no intervals inferred from snapshot spacing.
+- [DATA_SOURCES.md](../DATA_SOURCES.md) documents the current source and license choices, generalized 1880 NRCan replacement, and excluded snapshots.
+- [manifest.json](../public/data/manifest.json) lists the current snapshots and exclusions.
+- [timeline.mjs](../src/timeline.mjs) resolves only an exact floored snapshot year.
+- [build-data-bundle.mjs](../scripts/build-data-bundle.mjs) records each snapshot input URL, hash, corrections, and source information.
+
+The Jev record file contains the complete retained verification, source-role classification, and bounded source-screening inputs and outputs, including thresholds, distributions, dispositions, and usage. An exploratory screening attempt that included a very large geometry response failed with an API error; the source claims were then re-screened as bounded excerpts. Jev judgments organize source review; they do not establish historical truth or geometry accuracy.

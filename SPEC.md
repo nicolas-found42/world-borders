@@ -2,7 +2,7 @@
 
 This specification defines the historical border globe, the North America pilot, and its expansion into a world timeline. It also defines extensive Jev and TypeSafe use in data preparation, evaluation, and optional visual interaction. It separates the working prototype from requirements for subsequent releases. The audience is the project owner, implementers, data contributors, and reviewers.
 
-Status: implementation specification prepared on 2 October 2026. The project issue tracker is not configured; publication with the `ready-for-agent` label remains pending. This document specifies future work and does not claim that the proposed AI integrations or expanded historical coverage already exist.
+Status: implementation specification prepared on 2 October 2026. GitHub Issues, triage labels, required PR checks, source-refresh review, and GitHub Pages deployment verification are configured (issue #1; merged PRs #2 and #7). The North America temporal milestone is being refined; expanded historical coverage remains planned. This document specifies future work and does not claim that the proposed AI integrations or expanded historical coverage already exist.
 
 ## Problem Statement
 
@@ -132,6 +132,16 @@ The product starts in 1776, covers North America before the world, and provides 
 
 Stages express dependencies, not calendar estimates. The current 1880, 1938, 1960, and 2010 states have limited checks, not complete control validation.
 
+### First temporal milestone
+
+The first delivery establishes a versioned boundary-state contract in the static viewer while retaining the four legacy snapshots and their actual review grades. The contract records stable polity and state IDs, geometry source and input hashes, region, representation, temporal precision, evidence links, curator disposition, and limitations. Legacy records remain year-only; migration does not establish effective control or upgrade their review grade.
+
+Validate manifests and every GeoJSON asset at the loader boundary, including source joins, safe local asset paths, finite closed polygon rings, temporal bounds, and publication eligibility. Invalid data produces a recoverable loading error and pauses playback. The viewer clears geometry immediately on a date change and rejects obsolete responses even if a transport ignores cancellation. Versioned caching never joins geometry from a different dataset revision. Errors and loading are distinct from coverage gaps.
+
+Coverage is resolved independently for the requested region and representation. Year-only snapshots match the floored selected year; explicitly evidenced intervals include their start and exclude their end. Missing regions/layers are explicit. Ambiguous overlapping assertions are held as conflicts rather than resolved by list order. Tests use the existing coverage, asset-loader, geometry/ownership, judgment-policy, and browser seams described below, with deterministic fixtures and no paid calls in CI.
+
+Selection of the first new historical slice, permitted publication grade, 1776 disposition, and curator authority are pending the focused domain discussion and primary-source research. These decisions constrain data publication; the baseline contract/loader slice can proceed independently.
+
 ### Interface and interaction
 
 - Keep a dark full-screen globe stage, prominent year, compact polity legend, small utility controls, and a bottom timeline. Source details and keyboard help use dismissible panels rather than permanent explanatory content.
@@ -148,7 +158,7 @@ Stages express dependencies, not calendar estimates. The current 1880, 1938, 196
 
 ### Domain and temporal contracts
 
-No project glossary or ADR was found. Use the following domain vocabulary consistently:
+The root `GLOSSARY.md` records the shared domain vocabulary. Use the following contracts consistently:
 
 | Term               | Meaning                                                                                                                               |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
@@ -364,6 +374,6 @@ TypeSafe's [Jev 1.13 limitations](https://docs.typesafe.ai/model-jaggedness/jev-
 
 ### Publication
 
-This repository has no configured Git remote or project issue-tracker/triage configuration. Run `/setup-matt-pocock-skills` to establish the intended tracker. Once available, publish this specification as the project issue body and apply `ready-for-agent`. Do not create an unrelated repository, choose an arbitrary tracker, or claim publication occurred.
+The configured tracker is GitHub Issues for `nicolas-found42/world-borders`; issue and triage guidance lives in `docs/agents/`. Delivery infrastructure is complete in issue #1 and merged PRs #2 and #7. Publish milestone tickets with `ready-for-agent`, link actual dependencies, and verify PR checks, merge, issue closure, and the deployed commit. Reuse the existing source-review and Pages pipeline.
 
 Source availability, control/dispute reconstruction, semantic calibration, model licensing, creative-tool order, and device performance remain explicit release concerns. They do not authorize guessed data.
