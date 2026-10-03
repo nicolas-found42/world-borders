@@ -127,10 +127,11 @@ test('late replies and edited comments in an existing resolved thread require an
   const current = structuredClone(previous);
   current.pr.reviewThreads.nodes[0].comments.nodes[0].updatedAt = 'after';
   current.pr.reviewThreads.nodes[0].comments.nodes.push({ id: 'late-reply', updatedAt: 'after' });
+  current.pr.reviews.nodes[0].updatedAt = 'after';
   current.pr.reviews.nodes.push({ id: 'late-review', state: 'COMMENTED', submittedAt: 'after' });
   const activity = newReviewActivity(current, previous);
   assert.equal(activity.comments.length, 2);
-  assert.equal(activity.reviews.length, 1);
+  assert.equal(activity.reviews.length, 2);
   assert.equal(activity.threads.length, 0);
   assert.deepEqual(newReviewActivity(current, current), { comments: [], reviews: [], threads: [] });
 });
