@@ -1,5 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
 const remote = process.env.SITE_URL;
+const port = Number(process.env.PLAYWRIGHT_PORT || 5187);
 const base = process.env.APP_BASE_PATH || '/world-borders/';
 export default defineConfig({
   testDir: './tests/e2e',
@@ -9,7 +10,7 @@ export default defineConfig({
   forbidOnly: Boolean(process.env.CI),
   reporter: [['line'], ['html', { open: 'never' }]],
   use: {
-    baseURL: remote || `http://127.0.0.1:5187${base}`,
+    baseURL: remote || `http://127.0.0.1:${port}${base}`,
     viewport: { width: 1440, height: 950 },
     actionTimeout: 8000,
     trace: 'retain-on-failure',
@@ -43,8 +44,8 @@ export default defineConfig({
   webServer: remote
     ? undefined
     : {
-        command: 'npm run preview -- --port 5187 --strictPort',
-        url: `http://127.0.0.1:5187${base}`,
+        command: `npm run preview -- --port ${port} --strictPort`,
+        url: `http://127.0.0.1:${port}${base}`,
         reuseExistingServer: false,
       },
 });
