@@ -45,6 +45,11 @@ async function recover(marker, journal) {
   }
   await rm(`${marker}.next`, { force: true });
   await rm(marker);
+  if (journal.pointer && (await exists(journal.pointer))) {
+    const pointer = JSON.parse(await readFile(journal.pointer, 'utf8'));
+    if (pointer.marker !== marker) throw new Error('Transaction pointer changed during recovery');
+    await rm(journal.pointer);
+  }
 }
 
 // A separate lease serializes recovery and installation. All callers use identical timings.
@@ -54,6 +59,7 @@ export async function stagedDataBuild(cache, output, build, { checkpoint = async
   if (targets[0] === targets[1] || targets.some((p, i) => targets[1 - i].startsWith(p + sep)))
     throw new Error('Cache and output directories must be separate, non-nested paths');
   const marker = join(dirname(targets[0]), `.${basename(targets[0])}.transaction.json`);
+  const pointer = join(dirname(targets[1]), `.${basename(targets[1])}.transaction-pointer.json`);
   const releases = [];
   try {
     // Lock both destinations in a stable order, including when different caches share output.
@@ -69,6 +75,11 @@ export async function stagedDataBuild(cache, output, build, { checkpoint = async
       );
     }
     await checkpoint('locked');
+    if (await exists(pointer)) {
+      const pending = JSON.parse(await readFile(pointer, 'utf8'));
+      if (pending.marker !== marker)
+        throw new Error(`Recover the original destination pair first: ${pending.marker}`);
+    }
     if (await exists(marker)) {
       const text = await readFile(marker, 'utf8');
       // Legacy empty markers were created before any staging or active-directory mutation.
@@ -76,12 +87,25 @@ export async function stagedDataBuild(cache, output, build, { checkpoint = async
         await rm(marker);
         await rm(`${marker}.next`, { force: true });
       } else {
-        await recover(marker, JSON.parse(text));
+        const previous = JSON.parse(text);
+        const saved = await Promise.all(
+          (previous.targets || previous.entries.map((entry) => entry.target)).map(
+            canonicalDirectory,
+          ),
+        );
+        if (
+          (previous.targets && JSON.stringify(saved) !== JSON.stringify(targets)) ||
+          saved.some((target) => !targets.includes(target))
+        )
+          throw new Error('Recover the original destination pair before changing output');
+        await recover(marker, previous);
       }
     }
     await checkpoint('recovered');
-    const journal = { phase: 'building', entries: [] };
+    const journal = { phase: 'building', entries: [], targets, pointer };
+
     await saveJournal(marker, journal);
+    await saveJournal(pointer, { marker });
     await checkpoint('initialized');
     try {
       for (const [index, target] of targets.entries()) {

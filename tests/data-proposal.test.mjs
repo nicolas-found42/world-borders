@@ -74,6 +74,14 @@ test('changed-data proposal pushes only a review branch and requests a draft; du
     const head = git('rev-parse', 'HEAD');
     assert.match(run({ PROPOSAL_EXISTS: '1' }), /already covers/);
     assert.equal(git('rev-parse', 'HEAD'), head);
+    // Main may advance after push; proposal validation uses its own historical base.
+    git('switch', 'main');
+    await writeFile(join(cwd, 'public/data/main-advanced.json'), '{}');
+    git('add', 'public/data');
+    git('commit', '-m', 'test: main advances');
+    git('push', 'origin', 'main');
+    git('switch', branch);
+    assert.match(run(), /example.test/);
     await writeFile(join(cwd, 'unrelated-app.js'), 'unreviewed');
     git('add', 'unrelated-app.js');
     git('commit', '-m', 'test: unrelated remote change');

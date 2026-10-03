@@ -103,3 +103,38 @@ test(
     }
   },
 );
+
+test(
+  'pending transactions cannot be recovered through a different cache or output',
+  { timeout: 10000 },
+  async () => {
+    const root = await mkdtemp(join(tmpdir(), 'world-borders-pairs-'));
+    let process;
+    try {
+      await start(root);
+      process = child(root, 'backed-up-1');
+      assert.deepEqual((await once(process, 'message'))[0], { point: 'backed-up-1' });
+      const stopped = once(process, 'exit');
+      process.kill('SIGKILL');
+      await stopped;
+      await expireLeases(root);
+      await assert.rejects(
+        stagedDataBuild(join(root, 'cache-other'), join(root, 'output'), async () => {}),
+        /original destination pair/,
+      );
+      await assert.rejects(
+        stagedDataBuild(join(root, 'cache'), join(root, 'output-other'), async () => {}),
+        /original destination pair/,
+      );
+      await stagedDataBuild(join(root, 'cache'), join(root, 'output'), async () => {
+        for (const name of ['cache', 'output'])
+          assert.equal(await readFile(join(root, name, 'version'), 'utf8'), 'old');
+      });
+      assert.deepEqual((await readdir(root)).sort(), ['cache', 'output']);
+    } finally {
+      if (process && process.exitCode === null && process.signalCode === null)
+        process.kill('SIGKILL');
+      await rm(root, { recursive: true, force: true });
+    }
+  },
+);

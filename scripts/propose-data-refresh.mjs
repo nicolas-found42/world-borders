@@ -31,19 +31,16 @@ if (!report.changedFiles.length) {
       if (remoteBranch) {
         // Recover a successful push followed by an interrupted/failed PR creation.
         git('fetch', 'origin', `refs/heads/${branch}`);
+        const proposal = git('rev-parse', 'FETCH_HEAD');
         git('fetch', 'origin', 'refs/heads/main');
-        const base = git('merge-base', 'FETCH_HEAD', remoteBranch.split(/\s+/)[0]);
-        const changed = git('diff', '--name-only', base, remoteBranch.split(/\s+/)[0])
-          .split('\n')
-          .filter(Boolean);
-        const expected = report.changedFiles.map((file) => `public/data/${file}`).sort();
-        if (JSON.stringify(changed.sort()) !== JSON.stringify(expected))
+        const base = git('merge-base', 'FETCH_HEAD', proposal);
+        const changed = git('diff', '--name-only', base, proposal).split('\n').filter(Boolean);
+        // Verify proposal scope against its own base, even if main has advanced.
+        if (changed.some((file) => !file.startsWith('public/data/')))
           throw new Error(
-            'Existing proposal branch has unexpected changes outside the reviewed diff or unexpected data file set',
+            'Existing proposal branch has unexpected changes outside the reviewed data scope',
           );
-        // Fetching main changed FETCH_HEAD; inspect the exact proposal commit throughout.
-        git('fetch', 'origin', remoteBranch.split(/\s+/)[0]);
-        const remoteFiles = git('ls-tree', '-r', '--name-only', 'FETCH_HEAD', '--', 'public/data')
+        const remoteFiles = git('ls-tree', '-r', '--name-only', proposal, '--', 'public/data')
           .split('\n')
           .filter(Boolean)
           .map((path) => path.slice('public/data/'.length))
@@ -51,7 +48,7 @@ if (!report.changedFiles.length) {
         if (JSON.stringify(remoteFiles) !== JSON.stringify(Object.keys(report.after.files).sort()))
           throw new Error('Existing proposal branch has an unexpected data file set');
         for (const [file, expected] of Object.entries(report.after.files)) {
-          const raw = execFileSync('git', ['show', `FETCH_HEAD:public/data/${file}`]);
+          const raw = execFileSync('git', ['show', `${proposal}:public/data/${file}`]);
           if (createHash('sha256').update(raw).digest('hex') !== expected.sha256)
             throw new Error(`Existing proposal branch has unexpected data: ${file}`);
         }

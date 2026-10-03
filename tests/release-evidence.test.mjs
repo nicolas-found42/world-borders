@@ -53,6 +53,7 @@ function fixture() {
         ],
       },
     },
+    prChecks: [{ name: 'verify', bucket: 'pass' }],
     requiredChecks: ['verify'],
     upToDate: true,
     integrated: true,
@@ -74,9 +75,9 @@ test('release evidence rejects stale review, late threads, pending or absent che
   e.pr.reviewThreads.nodes.push({ isResolved: false });
   assert.match(releaseProblems(e, options).join(), /Unresolved/);
   e.pr.reviewThreads.nodes = [];
-  e.pr.commits.nodes[0].commit.statusCheckRollup.contexts.nodes[0].status = 'IN_PROGRESS';
+  e.prChecks[0].bucket = 'pending';
   assert.match(releaseProblems(e, options).join(), /Check not successful/);
-  e.pr.commits.nodes = [];
+  e.prChecks = [];
   assert.match(releaseProblems(e, options).join(), /Missing required checks/);
   e.upToDate = false;
   assert.match(releaseProblems(e, options).join(), /current main/);

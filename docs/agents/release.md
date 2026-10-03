@@ -44,7 +44,10 @@ observation, so repeat it at both boundaries. It cannot prevent later comments.
 The PR template contains `<!-- completed-issues: [] -->`. List only issue numbers
 fully completed by the merge, and use `Closes #N` for those issues. Use `Related issue
 #N` for partial work. `npm run check:pr -- PR_NUMBER` compares GitHub's parsed
-`closingIssuesReferences` with the declaration. CI repeats this on body edits.
+`closingIssuesReferences` with the declaration. CI repeats this on body edits using
+`pull_request_target`, read-only permissions and the base commit validator. PR code
+is never executed by that workflow. Initial publication of this trusted workflow
+is checked locally; enforce its required context once it exists on main.
 Dependabot PRs may omit the declaration only when GitHub reports no closing links.
 The draft geographic proposal declares an empty completed-issue list.
 
@@ -59,6 +62,9 @@ the process rather than permitting installation. Switch versions only while buil
 are idle; old versions used the journal itself as a PID lock.
 
 Staging paths are recorded before creation, and journal replacement is atomic.
+Both destinations identify pending transactions. If a different cache/output pair
+is requested while recovery is pending, the build fails before mutation; recover
+with the original pair first. After successful cleanup, destinations can be reused.
 The interrupted-process tests coordinate through IPC rather than sleeps. Run
 `node --test tests/data-build-interruption.test.mjs` to exercise kill/recovery and
 competing owners. This tests local process/filesystem interruption; it does not claim

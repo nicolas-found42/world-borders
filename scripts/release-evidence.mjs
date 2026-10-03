@@ -14,16 +14,14 @@ export function releaseProblems(evidence, { phase, reviewedHead, reviewNote }) {
     );
   if (pr.reviewThreads.nodes.some((t) => !t.isResolved)) problems.push('Unresolved review threads');
   if (pr.reviewDecision === 'CHANGES_REQUESTED') problems.push('Changes requested');
-  const checks = pr.commits.nodes[0]?.commit.statusCheckRollup?.contexts.nodes || [];
+  const checks = evidence.prChecks || [];
   const required = new Set(evidence.requiredChecks);
   for (const check of checks) {
-    const name = check.name || check.context;
+    const name = check.name;
+    if (required.has(name) && check.bucket !== 'pass')
+      problems.push(`Required check did not pass: ${name}`);
     required.delete(name);
-    if (
-      check.__typename === 'CheckRun'
-        ? check.status !== 'COMPLETED' || !acceptable.has(check.conclusion)
-        : check.state !== 'SUCCESS'
-    )
+    if (!['pass', 'skipping'].includes(check.bucket))
       problems.push(`Check not successful: ${name}`);
   }
   if (required.size) problems.push(`Missing required checks: ${[...required].join(', ')}`);
@@ -90,7 +88,7 @@ export function newReviewActivity(current, previous) {
 async function collect(number) {
   const repository = process.env.GITHUB_REPOSITORY || 'nicolas-found42/world-borders';
   const [owner, name] = repository.split('/');
-  const query = `query($owner:String!,$name:String!,$number:Int!){repository(owner:$owner,name:$name){defaultBranchRef{target{oid}} pullRequest(number:$number){url body author{login __typename} state isDraft headRefOid baseRefOid mergeable mergeStateStatus mergedAt reviewDecision mergeCommit{oid} closingIssuesReferences(first:100){nodes{number state stateReason repository{nameWithOwner}} pageInfo{hasNextPage}} reviewThreads(first:100){nodes{id isResolved comments(last:100){nodes{id url createdAt updatedAt path} pageInfo{hasPreviousPage}}} pageInfo{hasNextPage}} reviews(last:100){nodes{id updatedAt author{login __typename} state submittedAt commit{oid} url} pageInfo{hasPreviousPage}} commits(last:1){nodes{commit{oid statusCheckRollup{contexts(first:100){nodes{__typename ... on CheckRun{name status conclusion detailsUrl} ... on StatusContext{context state targetUrl}} pageInfo{hasNextPage}}}}}}}}}`;
+  const query = `query($owner:String!,$name:String!,$number:Int!){repository(owner:$owner,name:$name){defaultBranchRef{target{oid}} pullRequest(number:$number){url body author{login __typename} state isDraft headRefOid baseRefOid mergeable mergeStateStatus mergedAt reviewDecision potentialMergeCommit{oid} mergeCommit{oid} closingIssuesReferences(first:100){nodes{number state stateReason repository{nameWithOwner}} pageInfo{hasNextPage}} reviewThreads(first:100){nodes{id isResolved comments(last:100){nodes{id url createdAt updatedAt path} pageInfo{hasPreviousPage}}} pageInfo{hasNextPage}} reviews(last:100){nodes{id updatedAt author{login __typename} state submittedAt commit{oid} url} pageInfo{hasPreviousPage}}}}}`;
   const { repository: data } = githubQuery(query, { owner, name, number });
   const pr = data.pullRequest;
   if (
@@ -98,13 +96,37 @@ async function collect(number) {
     pr.reviewThreads.pageInfo.hasNextPage ||
     pr.reviewThreads.nodes.some((thread) => thread.comments.pageInfo.hasPreviousPage) ||
     pr.reviews.pageInfo.hasPreviousPage ||
-    pr.closingIssuesReferences.pageInfo.hasNextPage ||
-    pr.commits.nodes[0]?.commit.statusCheckRollup?.contexts.pageInfo.hasNextPage
+    pr.closingIssuesReferences.pageInfo.hasNextPage
   )
     throw new Error('Incomplete paginated evidence; inspect the full GitHub state');
   validateClosingIssues(pr.body, pr.closingIssuesReferences.nodes, repository, {
     dependencyBot: isDependencyBot(pr.author),
   });
+  const checksResult = (await import('node:child_process')).spawnSync(
+    'gh',
+    [
+      'pr',
+      'checks',
+      String(number),
+      '--repo',
+      repository,
+      '--json',
+      'name,state,bucket,workflow,link',
+    ],
+    { encoding: 'utf8' },
+  );
+  if (![0, 1, 8].includes(checksResult.status))
+    throw new Error(checksResult.stderr || 'Could not read PR checks');
+  const prChecks = JSON.parse(checksResult.stdout);
+  const checkHead = JSON.parse(
+    execFileSync(
+      'gh',
+      ['pr', 'view', String(number), '--repo', repository, '--json', 'headRefOid'],
+      { encoding: 'utf8' },
+    ),
+  ).headRefOid;
+  if (checkHead !== pr.headRefOid)
+    throw new Error('PR head changed while collecting checks; repeat inspection');
   const api = (endpoint) => JSON.parse(execFileSync('gh', ['api', endpoint], { encoding: 'utf8' }));
   const rules = api(`repos/${repository}/rules/branches/main`);
   const requiredChecks = rules
@@ -156,6 +178,7 @@ async function collect(number) {
     repository,
     pr,
     requiredChecks,
+    prChecks,
     mainSha,
     mainRuns,
     mainChecks: mainChecks.check_runs.map(({ name, status, conclusion, head_sha, html_url }) => ({
