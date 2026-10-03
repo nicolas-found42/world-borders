@@ -1,0 +1,5 @@
+{
+  "baselineJavaScriptGzipBytes": 594370,
+  "maxJavaScriptGzipBytes": 660000,
+  "rationale": "Initial measured Vite bundle is about 594 kB gzip. Allow about 10% growth; change the budget only with measured evidence and PR justification."
+}
