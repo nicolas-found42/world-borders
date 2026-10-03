@@ -1,3 +1,4 @@
+import { verifyAssetDigest } from '../src/asset-loader.mjs';
 import {
   validateManifest,
   validateGeometry,
@@ -26,12 +27,16 @@ for (let attempt = 0; attempt < 24 && Date.now() < deadline; attempt++) {
     if (info.commit !== expectedCommit)
       throw new Error(`Expected ${expectedCommit}, received ${info.commit}`);
     const manifest = validateManifest(await get('data/manifest.json'));
-    validateGeometry(await get('data/land.geojson'));
-    for (const file of new Set(manifest.states.map((state) => state.file)))
+    const land = validateGeometry(await get('data/land.geojson'));
+    await verifyAssetDigest(manifest, 'land.geojson', land);
+    for (const file of new Set(manifest.states.map((state) => state.file))) {
+      const data = await get(`data/${file}`);
       validateStateGeometry(
-        await get(`data/${file}`),
+        data,
         manifest.states.filter((state) => state.file === file),
       );
+      await verifyAssetDigest(manifest, file, data);
+    }
     if (resolveCoverage(manifest, { time: 1776 }).status !== 'gap')
       throw new Error('1776 coverage must remain a gap');
     const canada = resolveCoverage(manifest, { time: 1949 });

@@ -865,5 +865,13 @@
       ]
     }
   ],
-  "revision": "bf9a38a9e43b54cfca30c535a4dce7635df2bed9949bb720fed778a8f6bbe995"
+  "revision": "85a02bb91ed6aaab0ab70364998c7fe09f09b7a24b4e7787f462b0bb3b606259",
+  "assetDigests": {
+    "snapshot-1880.geojson": "55513b2ec2be8dd012a5e603236337f4c9d952a29471bf4559254ddb3d0f8eec",
+    "snapshot-1938.geojson": "a97572cd81a5f6239c6adfc075cfc2317f727e1738776128a6e1c9f6557efbe6",
+    "snapshot-1949.geojson": "cfc651f44dabf1d9611968ddbc6f3409b9c41cf7b5bb0ed8efcf8b65e1a0b1cd",
+    "snapshot-1960.geojson": "b20f2460c164262a2ed8ac5eba55784ae4d162da1836bc8a91da10232f54286e",
+    "snapshot-2010.geojson": "029754b4e66bd857a677a681c80be127670558f0bdee3681be1756ec243f8b33",
+    "land.geojson": "74e32d31a1f9531a8531d9f5d7bf1b29c4ec94f87a006639e998e01be14f9156"
+  }
 }

@@ -45,3 +45,16 @@ export function boundaryManifest(manifest, collections) {
   result.revision = createHash('sha256').update(JSON.stringify(result)).digest('hex');
   return result;
 }
+
+export function finalizeAssetRevision(manifest, assets) {
+  manifest.assetDigests = Object.fromEntries(
+    [...assets].map(([file, data]) => [
+      file,
+      createHash('sha256').update(JSON.stringify(data)).digest('hex'),
+    ]),
+  );
+  const content = { ...manifest };
+  delete content.revision;
+  manifest.revision = createHash('sha256').update(JSON.stringify(content)).digest('hex');
+  return manifest;
+}

@@ -13,5 +13,7 @@
     "research/jev-labrador-review-records.json"
   ],
   "transformation": "Fetch official unsimplified divisions, dissolve to national outline, then simplify rings at 0.03 degrees retaining selected boundary points. Preserve small islands and holes.",
-  "conflicts": []
+  "conflicts": [],
+  "publicationSha256": "21f7cf837af474eb8e3f33a81d425889f8c92a1e70e10f47dde5017ca4738721",
+  "outputSha256": "cfc651f44dabf1d9611968ddbc6f3409b9c41cf7b5bb0ed8efcf8b65e1a0b1cd"
 }

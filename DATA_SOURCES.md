@@ -91,3 +91,5 @@ passages, hashes, real judgments and held outcomes. The
 establish legal affiliation and the 1927 extent; the separately recorded March 31
 event does not validate polygon coordinates. The Declaration supplies no 1776
 polygons; neither 1715 nor 1783 is backcast to fill the gap.
+
+The Canada 1949 curator record binds both raw input and the proposed publication scope by SHA-256. Changing time, representation, coverage, limitations, evidence or transformation requires renewed review even when upstream geometry is unchanged.

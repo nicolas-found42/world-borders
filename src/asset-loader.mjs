@@ -1,4 +1,11 @@
 import { validateManifest, validateGeometry, validateStateGeometry } from './boundary-contract.mjs';
+export async function verifyAssetDigest(manifest, file, data) {
+  const bytes = new TextEncoder().encode(JSON.stringify(data));
+  const digest = await globalThis.crypto.subtle.digest('SHA-256', bytes);
+  const hex = [...new Uint8Array(digest)].map((n) => n.toString(16).padStart(2, '0')).join('');
+  if (manifest.assetDigests?.[file] !== hex)
+    throw new Error(`Invalid boundary data: asset digest mismatch for ${file}`);
+}
 const checkAbort = (signal) => {
   if (signal?.aborted) throw new DOMException('Obsolete asset request', 'AbortError');
 };
@@ -19,7 +26,11 @@ export function createAssetLoader({ fetcher = globalThis.fetch, urlFor = (path) 
         json('data/land.geojson', signal),
       ]);
       checkAbort(signal);
-      return { manifest: validateManifest(manifest), land: validateGeometry(land).features };
+      validateManifest(manifest);
+      validateGeometry(land);
+      await verifyAssetDigest(manifest, 'land.geojson', land);
+      checkAbort(signal);
+      return { manifest, land: land.features };
     },
     async loadStates(manifest, states, signal) {
       const files = [...new Set(states.map((s) => s.file))];
@@ -35,6 +46,8 @@ export function createAssetLoader({ fetcher = globalThis.fetch, urlFor = (path) 
               data,
               manifest.states.filter((s) => s.file === file),
             );
+            await verifyAssetDigest(manifest, file, data);
+            checkAbort(signal);
             cache.set(key, data);
           }
           checkAbort(signal);

@@ -65,3 +65,30 @@ test('unknown polity metadata in an otherwise valid asset cannot enter the cache
     /metadata mismatch/,
   );
 });
+
+test('changed output changes the revision and stale geometry fails the digest check', async () => {
+  const { finalizeAssetRevision } = await import('../scripts/boundary-manifest.mjs');
+  const states = manifest.states.filter((s) => s.time.year === 1880);
+  const altered = structuredClone(data);
+  const ring = altered.features[0].geometry.coordinates[0][0];
+  ring[1][0] += 0.001;
+  const changed = finalizeAssetRevision(
+    structuredClone(manifest),
+    new Map([['snapshot-1880.geojson', altered]]),
+  );
+  assert.notEqual(changed.revision, manifest.revision);
+  let supplied = data;
+  let calls = 0;
+  const loader = createAssetLoader({
+    fetcher: async () => {
+      calls++;
+      return { ok: true, json: async () => supplied };
+    },
+  });
+  await loader.loadStates(manifest, states);
+  await assert.rejects(loader.loadStates(changed, states), /digest mismatch/);
+  supplied = altered;
+  const loaded = await loader.loadStates(changed, states);
+  assert.deepEqual(loaded[0].geometry, altered.features[0].geometry);
+  assert.equal(calls, 3);
+});

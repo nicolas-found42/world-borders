@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { fetchSource } from './source-cache.mjs';
 import { canada1949Url, addCanada1949 } from './canada-1949.mjs';
 import { validateManifest } from '../src/boundary-contract.mjs';
-import { boundaryManifest } from './boundary-manifest.mjs';
+import { boundaryManifest, finalizeAssetRevision } from './boundary-manifest.mjs';
 import { union } from '@turf/union';
 import { featureCollection } from '@turf/helpers';
 
@@ -223,6 +223,14 @@ export async function buildBundle({ cacheDir, outputDir, refresh }) {
     await readFile(new URL('../data/curation/canada-1949.json', import.meta.url), 'utf8'),
   );
   const slice = addCanada1949(manifest, source1949, review);
+  finalizeAssetRevision(
+    slice.manifest,
+    new Map([
+      ...snapshots.map((s) => [s.file, collections.get(s.year)]),
+      ['snapshot-1949.geojson', slice.collection],
+      ['land.geojson', land.data],
+    ]),
+  );
   validateManifest(slice.manifest);
   await writeFile(join(outputDir, 'snapshot-1949.geojson'), JSON.stringify(slice.collection));
   await writeFile(join(outputDir, 'manifest.json'), JSON.stringify(slice.manifest, null, 2));

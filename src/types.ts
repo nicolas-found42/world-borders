@@ -30,6 +30,7 @@ export interface Source {
 export interface Manifest {
   schemaVersion: 2;
   revision: string;
+  assetDigests: Record<string, string>;
   states: BoundaryState[];
   polities: { id: string; name: string }[];
   evidence: EvidenceItem[];

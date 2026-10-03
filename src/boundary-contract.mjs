@@ -71,7 +71,18 @@ export function validateGeometry(data, { territories = false } = {}) {
 }
 export function validateManifest(data) {
   requireValue(data?.schemaVersion === 2, 'unsupported schema version');
-  requireValue(text(data.revision), 'dataset revision missing');
+  requireValue(hash(data.revision), 'dataset revision missing');
+  requireValue(
+    data.assetDigests && typeof data.assetDigests === 'object' && !Array.isArray(data.assetDigests),
+    'asset digests missing',
+  );
+  requireValue(
+    Object.entries(data.assetDigests).every(
+      ([file, digest]) => assetPattern.test(file) && hash(digest),
+    ),
+    'invalid asset digest',
+  );
+  requireValue(hash(data.assetDigests['land.geojson']), 'land asset digest missing');
   requireValue(
     Array.isArray(data.range) &&
       data.range.length === 2 &&
@@ -97,6 +108,8 @@ export function validateManifest(data) {
     );
     catalogs[key] = new Map(data[key].map((item) => [item.id, item]));
   }
+  for (const state of data.states)
+    requireValue(hash(data.assetDigests[state.file]), 'state asset digest missing');
   for (const source of data.sources)
     requireValue(
       ['name', 'author', 'license', 'note'].every((key) => text(source[key])) && https(source.url),

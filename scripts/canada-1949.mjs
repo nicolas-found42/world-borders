@@ -78,7 +78,6 @@ export function prepareCanada1949(source) {
   return collection;
 }
 export function addCanada1949(manifest, source, record) {
-  const disposition = publicationDisposition(source, record);
   const collection = prepareCanada1949(source);
   const input = { url: source.url, sha256: source.hash };
   const snapshot = {
@@ -123,7 +122,7 @@ export function addCanada1949(manifest, source, record) {
     url: 'https://www.legislation.gov.uk/ukpga/Geo6/12-13-14/22/enacted',
     note: 'Terms 1–2 establish legal affiliation and territorial definition; statute is evidence, not polygon coordinates.',
   });
-  manifest.states.push({
+  const state = {
     id: 'canada-1949',
     polityId: 'canada',
     featureId: 'canada',
@@ -143,8 +142,16 @@ export function addCanada1949(manifest, source, record) {
       'Official generalized reference geometry, not independent historical boundary validation or effective-control evidence.',
       'Unsimplified official divisions dissolved, then Douglas–Peucker simplification at 0.03 degrees retaining source boundary points. Government of Canada does not endorse this application.',
     ],
-    disposition,
+  };
+  const transformation =
+    'Fetch official unsimplified divisions, dissolve to national outline, then simplify rings at 0.03 degrees retaining selected boundary points. Preserve small islands and holes.';
+  state.disposition = publicationDisposition(source, record, {
+    state,
+    evidence,
+    transformation,
+    geometrySha256: createHash('sha256').update(JSON.stringify(collection)).digest('hex'),
   });
+  manifest.states.push(state);
   manifest.events.push({
     id: 'newfoundland-union-1949',
     name: 'Newfoundland’s entry into Canada',

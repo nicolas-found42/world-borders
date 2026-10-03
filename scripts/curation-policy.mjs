@@ -1,4 +1,7 @@
-export function publicationDisposition(source, record) {
+import { createHash } from 'node:crypto';
+export const publicationHash = (scope) =>
+  createHash('sha256').update(JSON.stringify(scope)).digest('hex');
+export function publicationDisposition(source, record, scope) {
   if (
     record?.status !== 'approved-reference' ||
     typeof record.reviewer !== 'string' ||
@@ -8,6 +11,14 @@ export function publicationDisposition(source, record) {
     typeof record.reason !== 'string' ||
     !record.reason.trim() ||
     record.inputSha256 !== source.hash ||
+    !scope ||
+    !/^[a-f0-9]{64}$/.test(scope.geometrySha256 || '') ||
+    record.outputSha256 !== scope.geometrySha256 ||
+    record.publicationSha256 !== publicationHash(scope) ||
+    record.id !== scope.state.id ||
+    record.representation !== scope.state.representation ||
+    JSON.stringify(record.evidence) !== JSON.stringify(scope.state.evidenceIds) ||
+    record.transformation !== scope.transformation ||
     !Array.isArray(record.conflicts) ||
     record.conflicts.length
   ) {
