@@ -1,0 +1,51 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '09:00'
+      timezone: America/New_York
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 5
+    groups:
+      react:
+        patterns: ['react', 'react-dom', '@types/react', '@types/react-dom']
+        update-types: [minor, patch]
+      graphics:
+        patterns: ['three', '@types/three', 'react-globe.gl', '@turf/*', 'd3-geo']
+        update-types: [minor, patch]
+      tooling:
+        patterns:
+          [
+            'vite',
+            '@vitejs/*',
+            'typescript',
+            '@playwright/*',
+            'eslint',
+            '@eslint/*',
+            'typescript-eslint',
+            'prettier',
+            'globals',
+            '@types/node',
+          ]
+        update-types: [minor, patch]
+      npm-security:
+        applies-to: security-updates
+        update-types: [minor, patch]
+    labels: [dependencies]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '09:00'
+      timezone: America/New_York
+    open-pull-requests-limit: 3
+    groups:
+      actions:
+        patterns: ['*']
+        update-types: [minor, patch]
+    labels: [dependencies]

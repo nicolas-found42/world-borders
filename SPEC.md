@@ -121,14 +121,14 @@ Creative additions include visual threads through reviewed moments, a comparison
 
 The product starts in 1776, covers North America before the world, and provides orbit, scrubbing, and play/pause. A small-data milestone is distinct from a complete atlas. Proposed Jev features are future work.
 
-| Stage | Deliverable | Completion condition |
-| --- | --- | --- |
-| Existing baseline | Interactive globe and four published pilot years | Preserve the working controls and explicit coverage gaps. Existing data remains labeled with its actual review status. |
-| Pilot data foundation | Correctly sourced 1776 starting state, reviewed North America transfers, explicit validity and polity identities | Named evidence and geometric review support every newly published state; excluded wrong-owner shapes stay excluded until replaced. |
-| Jev curation pipeline | Screen, retrieve, extract, audit, classify, reconcile, prioritize, and release checks | Recorded judgments, deterministic validation, curator review queue, replay tests, and domain evaluation operate on versioned evidence. |
-| Optional semantic navigation | Short commands selecting allowed actions and supplied arguments | Held-out command tests and action-policy tests pass; errors and unavailable service leave the manual viewer functional. |
-| Creative visual tools | Comparison, changed-region emphasis, and curated visual threads | Only approved available states are selected; sparse jumps are visible; no narration or unrequested camera motion. |
-| World expansion | Additional region packs using the same contracts | Each pack has independent source, licensing, representation, temporal, and geometry review. No global-completeness claim until an explicit coverage audit supports it. |
+| Stage                        | Deliverable                                                                                                      | Completion condition                                                                                                                                                   |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Existing baseline            | Interactive globe and four published pilot years                                                                 | Preserve the working controls and explicit coverage gaps. Existing data remains labeled with its actual review status.                                                 |
+| Pilot data foundation        | Correctly sourced 1776 starting state, reviewed North America transfers, explicit validity and polity identities | Named evidence and geometric review support every newly published state; excluded wrong-owner shapes stay excluded until replaced.                                     |
+| Jev curation pipeline        | Screen, retrieve, extract, audit, classify, reconcile, prioritize, and release checks                            | Recorded judgments, deterministic validation, curator review queue, replay tests, and domain evaluation operate on versioned evidence.                                 |
+| Optional semantic navigation | Short commands selecting allowed actions and supplied arguments                                                  | Held-out command tests and action-policy tests pass; errors and unavailable service leave the manual viewer functional.                                                |
+| Creative visual tools        | Comparison, changed-region emphasis, and curated visual threads                                                  | Only approved available states are selected; sparse jumps are visible; no narration or unrequested camera motion.                                                      |
+| World expansion              | Additional region packs using the same contracts                                                                 | Each pack has independent source, licensing, representation, temporal, and geometry review. No global-completeness claim until an explicit coverage audit supports it. |
 
 Stages express dependencies, not calendar estimates. The current 1880, 1938, 1960, and 2010 states have limited checks, not complete control validation.
 
@@ -150,19 +150,19 @@ Stages express dependencies, not calendar estimates. The current 1880, 1938, 196
 
 No project glossary or ADR was found. Use the following domain vocabulary consistently:
 
-| Term | Meaning |
-| --- | --- |
-| Polity | A historically identified political entity; identity is separate from its display name and territory. |
-| Boundary state | Geometry assigned to a polity, representation, and supported time extent. |
-| Snapshot | A source-supported state for a particular calendar year; the existing bundle uses this form. |
-| Validity interval | An explicitly evidenced start-inclusive, end-exclusive period for a state. It is never inferred from neighboring snapshots. |
-| Boundary event | A reviewed change associated with affected polities, evidence, and date precision; signing and administration can be separate events. |
-| Representation | Effective control, territorial claim, or dispute-related assertion. Unknown remains explicit. |
-| Coverage gap | No published eligible geometry for the requested region, time, and representation. |
-| Reference geometry | A licensed generalized shape that has not completed independent historical boundary review. |
-| Evidence item | A preserved source passage or map reference, with provenance and the specific assertion it supports. |
-| Judgment | A typed Jev answer with its probabilities, versioned inputs, and downstream policy disposition. |
-| Visual thread | A curated sequence of published moments selected for visual exploration, not a continuous reconstruction. |
+| Term               | Meaning                                                                                                                               |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Polity             | A historically identified political entity; identity is separate from its display name and territory.                                 |
+| Boundary state     | Geometry assigned to a polity, representation, and supported time extent.                                                             |
+| Snapshot           | A source-supported state for a particular calendar year; the existing bundle uses this form.                                          |
+| Validity interval  | An explicitly evidenced start-inclusive, end-exclusive period for a state. It is never inferred from neighboring snapshots.           |
+| Boundary event     | A reviewed change associated with affected polities, evidence, and date precision; signing and administration can be separate events. |
+| Representation     | Effective control, territorial claim, or dispute-related assertion. Unknown remains explicit.                                         |
+| Coverage gap       | No published eligible geometry for the requested region, time, and representation.                                                    |
+| Reference geometry | A licensed generalized shape that has not completed independent historical boundary review.                                           |
+| Evidence item      | A preserved source passage or map reference, with provenance and the specific assertion it supports.                                  |
+| Judgment           | A typed Jev answer with its probabilities, versioned inputs, and downstream policy disposition.                                       |
+| Visual thread      | A curated sequence of published moments selected for visual exploration, not a continuous reconstruction.                             |
 
 Expand the manifest with a new schema version while preserving the existing year-only records. Each boundary state identifies its polity, geometry asset, source references, geographic coverage, representation, supported time extent, precision, review grade, and limitations. Use stable IDs rather than names as joins.
 
@@ -210,24 +210,24 @@ Batch independent questions over compact state. Consume speculative arguments on
 
 The following workflows are in scope for the planned integration:
 
-| Workflow | Jev role | Code and reviewer responsibility |
-| --- | --- | --- |
-| External text intake | Screen agent-directed instructions, substantive content, and relevance | Preserve raw provenance, isolate source content from instructions, hold blocks and inspect review cases. Screening is not historical truth verification. |
-| Evidence retrieval | Find/rerank passages against a named assertion | Retrieve candidates first; require actual evidence existence and subsequent support checks. |
-| Citation validation | Classify support, contradiction, or silence for each claim | Check quoted-span presence deterministically; preserve source context and separate coordinate, identity, date, and control assertions. |
-| Date and value extraction | Choose verbatim spans or enumerated components | Generate complete candidates, copy selected text, parse and compare dates in code; preserve not-stated. |
-| Extraction audit | Detect hallucinated, off-target, incomplete, or omitted values | Reject fabricated fields and require source review; two text artifacts agreeing does not verify pixels. |
-| Polity reconciliation | Suggest alias, succession, unrelated, or review | Apply time/identity constraints; curator approves merges and relationships. |
-| Representation review | Classify claims, administration evidence, disputes, mixed assertions, or unknown | Keep geometry and asserted extents separate; never infer polygons from narrative. |
-| License triage | Identify relevant license clauses and ambiguity | Use reviewed license allowlists and explicit compatibility decisions; the model cannot grant permission. |
-| Contradiction discovery | Compare independent source aspects | Retain competing assertions and curator disposition, with no confidence-based historical winner. |
-| Review prioritization | Score evidence completeness and review usefulness independently | Hard failures override all weighted preferences; calculations and queue weights stay in code. |
-| Coverage planning | Rank bounded research targets against pilot needs | Real coverage, geometry deltas, and source eligibility are computed or reviewed separately. |
-| Semantic navigation | Select allowed intent, argument candidates, and explicit-presence signals | Validate action, context, coverage, state revision, and every required argument before execution. |
-| Gazetteer focus | Select a supplied known place matching explicit viewer intent | Resolve bounds and animate camera in code; bare or negated mentions are not focus authorization. |
-| Visual threads | Rank reviewed moments by requested visual theme | Remove unsupported moments first, sort time in code, label sparse jumps, obey camera preferences. |
-| Comparison selection | Match a phrase to two approved states | Compute actual geometry differences and synchronize manual camera; do not infer dates or causality. |
-| Release verification | Check coverage and completion statements against artifacts and logs | Real tests run first; hold contradicted claims and expose unresolved review. |
+| Workflow                  | Jev role                                                                         | Code and reviewer responsibility                                                                                                                         |
+| ------------------------- | -------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| External text intake      | Screen agent-directed instructions, substantive content, and relevance           | Preserve raw provenance, isolate source content from instructions, hold blocks and inspect review cases. Screening is not historical truth verification. |
+| Evidence retrieval        | Find/rerank passages against a named assertion                                   | Retrieve candidates first; require actual evidence existence and subsequent support checks.                                                              |
+| Citation validation       | Classify support, contradiction, or silence for each claim                       | Check quoted-span presence deterministically; preserve source context and separate coordinate, identity, date, and control assertions.                   |
+| Date and value extraction | Choose verbatim spans or enumerated components                                   | Generate complete candidates, copy selected text, parse and compare dates in code; preserve not-stated.                                                  |
+| Extraction audit          | Detect hallucinated, off-target, incomplete, or omitted values                   | Reject fabricated fields and require source review; two text artifacts agreeing does not verify pixels.                                                  |
+| Polity reconciliation     | Suggest alias, succession, unrelated, or review                                  | Apply time/identity constraints; curator approves merges and relationships.                                                                              |
+| Representation review     | Classify claims, administration evidence, disputes, mixed assertions, or unknown | Keep geometry and asserted extents separate; never infer polygons from narrative.                                                                        |
+| License triage            | Identify relevant license clauses and ambiguity                                  | Use reviewed license allowlists and explicit compatibility decisions; the model cannot grant permission.                                                 |
+| Contradiction discovery   | Compare independent source aspects                                               | Retain competing assertions and curator disposition, with no confidence-based historical winner.                                                         |
+| Review prioritization     | Score evidence completeness and review usefulness independently                  | Hard failures override all weighted preferences; calculations and queue weights stay in code.                                                            |
+| Coverage planning         | Rank bounded research targets against pilot needs                                | Real coverage, geometry deltas, and source eligibility are computed or reviewed separately.                                                              |
+| Semantic navigation       | Select allowed intent, argument candidates, and explicit-presence signals        | Validate action, context, coverage, state revision, and every required argument before execution.                                                        |
+| Gazetteer focus           | Select a supplied known place matching explicit viewer intent                    | Resolve bounds and animate camera in code; bare or negated mentions are not focus authorization.                                                         |
+| Visual threads            | Rank reviewed moments by requested visual theme                                  | Remove unsupported moments first, sort time in code, label sparse jumps, obey camera preferences.                                                        |
+| Comparison selection      | Match a phrase to two approved states                                            | Compute actual geometry differences and synchronize manual camera; do not infer dates or causality.                                                      |
+| Release verification      | Check coverage and completion statements against artifacts and logs              | Real tests run first; hold contradicted claims and expose unresolved review.                                                                             |
 
 Screening, extraction, citation checks, function routing, and entity alignment follow the shapes in the official [citation cookbook](https://docs.typesafe.ai/cookbooks/citation_check), [value-selection cookbook](https://docs.typesafe.ai/cookbooks/pre_parsed_value_extraction_cookbook), [function-calling cookbook](https://docs.typesafe.ai/cookbooks/function_calling), and [entity-alignment cookbook](https://docs.typesafe.ai/cookbooks/entity_alignment). Their thresholds and results are examples, not historical-domain validation.
 
@@ -277,20 +277,20 @@ Document WebGL-unavailable behavior as a recoverable capability message with ava
 
 The owner explicitly requested more testing seams after the initial browser-plus-data proposal. Use the following focused contracts, with browser tests retaining responsibility for the composed viewer behavior. Good tests assert external results, visible states, domain invariants, and invalid-action rejection rather than matching component structure or copying implementation logic.
 
-| Seam | Behaviors to verify | Prior art and additions |
-| --- | --- | --- |
-| Time controller | Elapsed-time speed, seek pause, bounds, end restart, hidden-tab resume, input commit | Existing timeline unit checks and playback browser scenario; add transition tests with a controlled clock. |
-| Coverage resolver | Year-only semantics, explicit interval boundaries, partial region/layer coverage, overlapping assertions, supported precision, gap versus error | Existing unsupported-year and sparse-step tests; add contract fixtures for new interval schema. |
-| Asset loader | Cancellation, out-of-order completion, malformed manifest/GeoJSON, retry, cache version, prefetch failure | Existing loading logic; new tests with controlled fetch responses and visible result assertions. |
-| Geometry adapter | Ring orientation, holes, antimeridian and polar cases, multi-island ownership, bounded triangulation | Existing hole/date-line tests and Canadian vertex-count regression. Preserve source points. |
-| Data build and provenance | Input hashes, licenses, transformation record, valid closed rings, declared extent, reproducible bundle | Existing provenance/ring checks; add fixture-based importer and release-contract tests. |
-| Historical ownership and representation | Reviewed before/after point containment, excluded wrong-owner cases, claim/control distinction, successor identity | Existing Hawaii/Newfoundland checks; add primary-evidence-reviewed cases for every new transfer. Spot checks do not certify whole geometry. |
-| Jev provider adapter | Correct request shape, typed response validation, missing answers, unknown choices, malformed distributions, abort, timeout, 429/5xx behavior, no exposed key | New adapter contract tests using recorded/mock transport; separately opt-in live SDK smoke test. |
-| Judgment policy | Hard exclusions, uncertainty route, no-match, cache identity, curator approval requirement, no score compensation | New deterministic replay tests using real experiment outputs, including failures and invalid response. |
-| Semantic action contract | Allowed action and arguments, positive argument presence, before versus compare, unknown place, ambiguous referent, negation, unsupported command, stale state | Recorded 24-command experiments and six argument-presence fixtures; add independent held-out phrases and action-result assertions. |
-| Visual sequence and comparison | Eligible moments only, chronological order, sparse labels, real changed regions, camera independence, interruption | New integration tests with curated small geometry packs; never use model-generated event dates as ground truth. |
-| Browser viewer | Orbit, zoom, reset inertia, camera preservation, play/pause, speed, wheel regions, keyboard, gaps, dialogs, mobile layout, reduced motion, runtime errors | Existing production-preview Playwright scenario; split into focused journeys with shared setup rather than one long fragile chain. |
-| Release statements | Coverage claims, AI capability claims, test evidence, source grades, licensing statements, excluded data | Jev verification against actual artifact/log evidence plus deterministic manifest checks. Advisory review does not replace tests. |
+| Seam                                    | Behaviors to verify                                                                                                                                            | Prior art and additions                                                                                                                     |
+| --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| Time controller                         | Elapsed-time speed, seek pause, bounds, end restart, hidden-tab resume, input commit                                                                           | Existing timeline unit checks and playback browser scenario; add transition tests with a controlled clock.                                  |
+| Coverage resolver                       | Year-only semantics, explicit interval boundaries, partial region/layer coverage, overlapping assertions, supported precision, gap versus error                | Existing unsupported-year and sparse-step tests; add contract fixtures for new interval schema.                                             |
+| Asset loader                            | Cancellation, out-of-order completion, malformed manifest/GeoJSON, retry, cache version, prefetch failure                                                      | Existing loading logic; new tests with controlled fetch responses and visible result assertions.                                            |
+| Geometry adapter                        | Ring orientation, holes, antimeridian and polar cases, multi-island ownership, bounded triangulation                                                           | Existing hole/date-line tests and Canadian vertex-count regression. Preserve source points.                                                 |
+| Data build and provenance               | Input hashes, licenses, transformation record, valid closed rings, declared extent, reproducible bundle                                                        | Existing provenance/ring checks; add fixture-based importer and release-contract tests.                                                     |
+| Historical ownership and representation | Reviewed before/after point containment, excluded wrong-owner cases, claim/control distinction, successor identity                                             | Existing Hawaii/Newfoundland checks; add primary-evidence-reviewed cases for every new transfer. Spot checks do not certify whole geometry. |
+| Jev provider adapter                    | Correct request shape, typed response validation, missing answers, unknown choices, malformed distributions, abort, timeout, 429/5xx behavior, no exposed key  | New adapter contract tests using recorded/mock transport; separately opt-in live SDK smoke test.                                            |
+| Judgment policy                         | Hard exclusions, uncertainty route, no-match, cache identity, curator approval requirement, no score compensation                                              | New deterministic replay tests using real experiment outputs, including failures and invalid response.                                      |
+| Semantic action contract                | Allowed action and arguments, positive argument presence, before versus compare, unknown place, ambiguous referent, negation, unsupported command, stale state | Recorded 24-command experiments and six argument-presence fixtures; add independent held-out phrases and action-result assertions.          |
+| Visual sequence and comparison          | Eligible moments only, chronological order, sparse labels, real changed regions, camera independence, interruption                                             | New integration tests with curated small geometry packs; never use model-generated event dates as ground truth.                             |
+| Browser viewer                          | Orbit, zoom, reset inertia, camera preservation, play/pause, speed, wheel regions, keyboard, gaps, dialogs, mobile layout, reduced motion, runtime errors      | Existing production-preview Playwright scenario; split into focused journeys with shared setup rather than one long fragile chain.          |
+| Release statements                      | Coverage claims, AI capability claims, test evidence, source grades, licensing statements, excluded data                                                       | Jev verification against actual artifact/log evidence plus deterministic manifest checks. Advisory review does not replace tests.           |
 
 ### Model evaluation
 

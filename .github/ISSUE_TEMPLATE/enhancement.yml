@@ -1,0 +1,25 @@
+name: Improvement
+description: Propose a change with scope and measurable completion criteria.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: Need and current behavior
+      description: Describe the user or maintainer need and evidence for it.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed change and scope
+      description: Include alternatives, dependencies and explicit exclusions when relevant.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria and verification
+      description: List testable outcomes and how to verify them.
+    validations:
+      required: true

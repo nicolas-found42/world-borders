@@ -4,10 +4,14 @@ A visual globe and timeline for historical borders. The first pilot covers the
 United States, Canada, Mexico, and selected predecessor territories. Application
 code is GPL-3.0-only; geographic data retains its individual source licenses.
 
+[Live globe](https://nicolas-found42.github.io/world-borders/) · [Contributing](CONTRIBUTING.md)
+
 ## Run locally
 
+Use Node 24. The development URL is `http://127.0.0.1:5173/world-borders/`.
+
 ```sh
-npm install
+npm ci
 npm run dev
 ```
 
@@ -65,8 +69,8 @@ and date-line crossings. No intermediate historical boundary is generated.
 ## Development
 
 ```sh
-npm test
-npm run build
+npm run check
+npx playwright install chromium
 npm run test:e2e
 ```
 
