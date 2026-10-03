@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "range": [
     1776,
     2026
@@ -129,5 +129,607 @@
     "Early colonial claims are not effective control. Indigenous territories are not yet mapped; neutral areas do not imply uninhabited or unclaimed land.",
     "A complete disputed-boundary layer is not yet available. No disputed areas are invented.",
     "Nearby island and predecessor coverage is incomplete. Overseas dependencies are outside this pilot."
-  ]
+  ],
+  "polities": [
+    {
+      "id": "canada",
+      "name": "Canada"
+    },
+    {
+      "id": "mexico",
+      "name": "Mexico"
+    },
+    {
+      "id": "hawaii",
+      "name": "Hawaiian Kingdom"
+    },
+    {
+      "id": "usa",
+      "name": "United States"
+    },
+    {
+      "id": "newfoundland",
+      "name": "Newfoundland"
+    }
+  ],
+  "states": [
+    {
+      "id": "canada-1880",
+      "polityId": "canada",
+      "featureId": "canada",
+      "file": "snapshot-1880.geojson",
+      "sourceIds": [
+        "nrcan"
+      ],
+      "inputs": [
+        {
+          "url": "https://raw.githubusercontent.com/aourednik/historical-basemaps/master/geojson/world_1880.geojson",
+          "sha256": "4751e30d881d60d31479f5d016ff4d9c1df47e9bb18efaa3a5086601f68f76dc"
+        },
+        {
+          "url": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/territorial_evolution_en/MapServer/8/query?where=START_TIME%3D1880&outFields=PROV_NAME,START_TIME,Period_Group&outSR=4326&maxAllowableOffset=0.03&f=geojson",
+          "sha256": "5f4b5805166eaa8198c325ff8301881a891f40fe66b88b79a889b0bf4a8cdd5c"
+        }
+      ],
+      "regions": [
+        "north-america"
+      ],
+      "coverage": "partial",
+      "representation": "source-political",
+      "time": {
+        "kind": "snapshot",
+        "year": 1880,
+        "precision": "year"
+      },
+      "precision": "generalized",
+      "review": "official-source",
+      "evidenceIds": [],
+      "limitations": [
+        "Generalized source snapshot; independent historical boundary validation and local dispute coverage are incomplete."
+      ],
+      "disposition": {
+        "status": "legacy-published",
+        "reviewer": "Existing published bundle",
+        "reason": "Preserve the baseline review grade without promoting historical accuracy.",
+        "conflicts": []
+      }
+    },
+    {
+      "id": "mexico-1880",
+      "polityId": "mexico",
+      "featureId": "mexico",
+      "file": "snapshot-1880.geojson",
+      "sourceIds": [
+        "historical-basemaps"
+      ],
+      "inputs": [
+        {
+          "url": "https://raw.githubusercontent.com/aourednik/historical-basemaps/master/geojson/world_1880.geojson",
+          "sha256": "4751e30d881d60d31479f5d016ff4d9c1df47e9bb18efaa3a5086601f68f76dc"
+        },
+        {
+          "url": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/territorial_evolution_en/MapServer/8/query?where=START_TIME%3D1880&outFields=PROV_NAME,START_TIME,Period_Group&outSR=4326&maxAllowableOffset=0.03&f=geojson",
+          "sha256": "5f4b5805166eaa8198c325ff8301881a891f40fe66b88b79a889b0bf4a8cdd5c"
+        }
+      ],
+      "regions": [
+        "north-america"
+      ],
+      "coverage": "partial",
+      "representation": "source-political",
+      "time": {
+        "kind": "snapshot",
+        "year": 1880,
+        "precision": "year"
+      },
+      "precision": "generalized",
+      "review": "source-snapshot",
+      "evidenceIds": [],
+      "limitations": [
+        "Generalized source snapshot; independent historical boundary validation and local dispute coverage are incomplete."
+      ],
+      "disposition": {
+        "status": "legacy-published",
+        "reviewer": "Existing published bundle",
+        "reason": "Preserve the baseline review grade without promoting historical accuracy.",
+        "conflicts": []
+      }
+    },
+    {
+      "id": "hawaii-1880",
+      "polityId": "hawaii",
+      "featureId": "hawaii",
+      "file": "snapshot-1880.geojson",
+      "sourceIds": [
+        "historical-basemaps"
+      ],
+      "inputs": [
+        {
+          "url": "https://raw.githubusercontent.com/aourednik/historical-basemaps/master/geojson/world_1880.geojson",
+          "sha256": "4751e30d881d60d31479f5d016ff4d9c1df47e9bb18efaa3a5086601f68f76dc"
+        },
+        {
+          "url": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/territorial_evolution_en/MapServer/8/query?where=START_TIME%3D1880&outFields=PROV_NAME,START_TIME,Period_Group&outSR=4326&maxAllowableOffset=0.03&f=geojson",
+          "sha256": "5f4b5805166eaa8198c325ff8301881a891f40fe66b88b79a889b0bf4a8cdd5c"
+        }
+      ],
+      "regions": [
+        "north-america"
+      ],
+      "coverage": "partial",
+      "representation": "source-political",
+      "time": {
+        "kind": "snapshot",
+        "year": 1880,
+        "precision": "year"
+      },
+      "precision": "generalized",
+      "review": "source-snapshot",
+      "evidenceIds": [],
+      "limitations": [
+        "Generalized source snapshot; independent historical boundary validation and local dispute coverage are incomplete."
+      ],
+      "disposition": {
+        "status": "legacy-published",
+        "reviewer": "Existing published bundle",
+        "reason": "Preserve the baseline review grade without promoting historical accuracy.",
+        "conflicts": []
+      }
+    },
+    {
+      "id": "usa-1880",
+      "polityId": "usa",
+      "featureId": "usa",
+      "file": "snapshot-1880.geojson",
+      "sourceIds": [
+        "historical-basemaps"
+      ],
+      "inputs": [
+        {
+          "url": "https://raw.githubusercontent.com/aourednik/historical-basemaps/master/geojson/world_1880.geojson",
+          "sha256": "4751e30d881d60d31479f5d016ff4d9c1df47e9bb18efaa3a5086601f68f76dc"
+        },
+        {
+          "url": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/territorial_evolution_en/MapServer/8/query?where=START_TIME%3D1880&outFields=PROV_NAME,START_TIME,Period_Group&outSR=4326&maxAllowableOffset=0.03&f=geojson",
+          "sha256": "5f4b5805166eaa8198c325ff8301881a891f40fe66b88b79a889b0bf4a8cdd5c"
+        }
+      ],
+      "regions": [
+        "north-america"
+      ],
+      "coverage": "partial",
+      "representation": "source-political",
+      "time": {
+        "kind": "snapshot",
+        "year": 1880,
+        "precision": "year"
+      },
+      "precision": "generalized",
+      "review": "source-snapshot",
+      "evidenceIds": [],
+      "limitations": [
+        "Generalized source snapshot; independent historical boundary validation and local dispute coverage are incomplete."
+      ],
+      "disposition": {
+        "status": "legacy-published",
+        "reviewer": "Existing published bundle",
+        "reason": "Preserve the baseline review grade without promoting historical accuracy.",
+        "conflicts": []
+      }
+    },
+    {
+      "id": "newfoundland-1880",
+      "polityId": "newfoundland",
+      "featureId": "newfoundland",
+      "file": "snapshot-1880.geojson",
+      "sourceIds": [
+        "nrcan"
+      ],
+      "inputs": [
+        {
+          "url": "https://raw.githubusercontent.com/aourednik/historical-basemaps/master/geojson/world_1880.geojson",
+          "sha256": "4751e30d881d60d31479f5d016ff4d9c1df47e9bb18efaa3a5086601f68f76dc"
+        },
+        {
+          "url": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/territorial_evolution_en/MapServer/8/query?where=START_TIME%3D1880&outFields=PROV_NAME,START_TIME,Period_Group&outSR=4326&maxAllowableOffset=0.03&f=geojson",
+          "sha256": "5f4b5805166eaa8198c325ff8301881a891f40fe66b88b79a889b0bf4a8cdd5c"
+        }
+      ],
+      "regions": [
+        "north-america"
+      ],
+      "coverage": "partial",
+      "representation": "source-political",
+      "time": {
+        "kind": "snapshot",
+        "year": 1880,
+        "precision": "year"
+      },
+      "precision": "generalized",
+      "review": "official-source",
+      "evidenceIds": [],
+      "limitations": [
+        "Generalized source snapshot; independent historical boundary validation and local dispute coverage are incomplete."
+      ],
+      "disposition": {
+        "status": "legacy-published",
+        "reviewer": "Existing published bundle",
+        "reason": "Preserve the baseline review grade without promoting historical accuracy.",
+        "conflicts": []
+      }
+    },
+    {
+      "id": "mexico-1938",
+      "polityId": "mexico",
+      "featureId": "mexico",
+      "file": "snapshot-1938.geojson",
+      "sourceIds": [
+        "historical-basemaps"
+      ],
+      "inputs": [
+        {
+          "url": "https://raw.githubusercontent.com/aourednik/historical-basemaps/master/geojson/world_1938.geojson",
+          "sha256": "f2565926fed1b197227b7fe126934a43ed75b8fce007e38be72a7d21a415d813"
+        }
+      ],
+      "regions": [
+        "north-america"
+      ],
+      "coverage": "partial",
+      "representation": "source-political",
+      "time": {
+        "kind": "snapshot",
+        "year": 1938,
+        "precision": "year"
+      },
+      "precision": "generalized",
+      "review": "source-snapshot",
+      "evidenceIds": [],
+      "limitations": [
+        "Generalized source snapshot; independent historical boundary validation and local dispute coverage are incomplete."
+      ],
+      "disposition": {
+        "status": "legacy-published",
+        "reviewer": "Existing published bundle",
+        "reason": "Preserve the baseline review grade without promoting historical accuracy.",
+        "conflicts": []
+      }
+    },
+    {
+      "id": "newfoundland-1938",
+      "polityId": "newfoundland",
+      "featureId": "newfoundland",
+      "file": "snapshot-1938.geojson",
+      "sourceIds": [
+        "historical-basemaps"
+      ],
+      "inputs": [
+        {
+          "url": "https://raw.githubusercontent.com/aourednik/historical-basemaps/master/geojson/world_1938.geojson",
+          "sha256": "f2565926fed1b197227b7fe126934a43ed75b8fce007e38be72a7d21a415d813"
+        }
+      ],
+      "regions": [
+        "north-america"
+      ],
+      "coverage": "partial",
+      "representation": "source-political",
+      "time": {
+        "kind": "snapshot",
+        "year": 1938,
+        "precision": "year"
+      },
+      "precision": "generalized",
+      "review": "source-snapshot",
+      "evidenceIds": [],
+      "limitations": [
+        "Generalized source snapshot; independent historical boundary validation and local dispute coverage are incomplete."
+      ],
+      "disposition": {
+        "status": "legacy-published",
+        "reviewer": "Existing published bundle",
+        "reason": "Preserve the baseline review grade without promoting historical accuracy.",
+        "conflicts": []
+      }
+    },
+    {
+      "id": "canada-1938",
+      "polityId": "canada",
+      "featureId": "canada",
+      "file": "snapshot-1938.geojson",
+      "sourceIds": [
+        "historical-basemaps"
+      ],
+      "inputs": [
+        {
+          "url": "https://raw.githubusercontent.com/aourednik/historical-basemaps/master/geojson/world_1938.geojson",
+          "sha256": "f2565926fed1b197227b7fe126934a43ed75b8fce007e38be72a7d21a415d813"
+        }
+      ],
+      "regions": [
+        "north-america"
+      ],
+      "coverage": "partial",
+      "representation": "source-political",
+      "time": {
+        "kind": "snapshot",
+        "year": 1938,
+        "precision": "year"
+      },
+      "precision": "generalized",
+      "review": "source-snapshot",
+      "evidenceIds": [],
+      "limitations": [
+        "Generalized source snapshot; independent historical boundary validation and local dispute coverage are incomplete."
+      ],
+      "disposition": {
+        "status": "legacy-published",
+        "reviewer": "Existing published bundle",
+        "reason": "Preserve the baseline review grade without promoting historical accuracy.",
+        "conflicts": []
+      }
+    },
+    {
+      "id": "usa-1938",
+      "polityId": "usa",
+      "featureId": "usa",
+      "file": "snapshot-1938.geojson",
+      "sourceIds": [
+        "historical-basemaps"
+      ],
+      "inputs": [
+        {
+          "url": "https://raw.githubusercontent.com/aourednik/historical-basemaps/master/geojson/world_1938.geojson",
+          "sha256": "f2565926fed1b197227b7fe126934a43ed75b8fce007e38be72a7d21a415d813"
+        }
+      ],
+      "regions": [
+        "north-america"
+      ],
+      "coverage": "partial",
+      "representation": "source-political",
+      "time": {
+        "kind": "snapshot",
+        "year": 1938,
+        "precision": "year"
+      },
+      "precision": "generalized",
+      "review": "source-snapshot",
+      "evidenceIds": [],
+      "limitations": [
+        "Generalized source snapshot; independent historical boundary validation and local dispute coverage are incomplete."
+      ],
+      "disposition": {
+        "status": "legacy-published",
+        "reviewer": "Existing published bundle",
+        "reason": "Preserve the baseline review grade without promoting historical accuracy.",
+        "conflicts": []
+      }
+    },
+    {
+      "id": "usa-1960",
+      "polityId": "usa",
+      "featureId": "usa",
+      "file": "snapshot-1960.geojson",
+      "sourceIds": [
+        "historical-basemaps"
+      ],
+      "inputs": [
+        {
+          "url": "https://raw.githubusercontent.com/aourednik/historical-basemaps/master/geojson/world_1960.geojson",
+          "sha256": "6067386755f8fc120a4fca44f198952a18da89cd062aa8013d5a0d08cbad8988"
+        }
+      ],
+      "regions": [
+        "north-america"
+      ],
+      "coverage": "partial",
+      "representation": "source-political",
+      "time": {
+        "kind": "snapshot",
+        "year": 1960,
+        "precision": "year"
+      },
+      "precision": "generalized",
+      "review": "source-snapshot",
+      "evidenceIds": [],
+      "limitations": [
+        "Generalized source snapshot; independent historical boundary validation and local dispute coverage are incomplete."
+      ],
+      "disposition": {
+        "status": "legacy-published",
+        "reviewer": "Existing published bundle",
+        "reason": "Preserve the baseline review grade without promoting historical accuracy.",
+        "conflicts": []
+      }
+    },
+    {
+      "id": "mexico-1960",
+      "polityId": "mexico",
+      "featureId": "mexico",
+      "file": "snapshot-1960.geojson",
+      "sourceIds": [
+        "historical-basemaps"
+      ],
+      "inputs": [
+        {
+          "url": "https://raw.githubusercontent.com/aourednik/historical-basemaps/master/geojson/world_1960.geojson",
+          "sha256": "6067386755f8fc120a4fca44f198952a18da89cd062aa8013d5a0d08cbad8988"
+        }
+      ],
+      "regions": [
+        "north-america"
+      ],
+      "coverage": "partial",
+      "representation": "source-political",
+      "time": {
+        "kind": "snapshot",
+        "year": 1960,
+        "precision": "year"
+      },
+      "precision": "generalized",
+      "review": "source-snapshot",
+      "evidenceIds": [],
+      "limitations": [
+        "Generalized source snapshot; independent historical boundary validation and local dispute coverage are incomplete."
+      ],
+      "disposition": {
+        "status": "legacy-published",
+        "reviewer": "Existing published bundle",
+        "reason": "Preserve the baseline review grade without promoting historical accuracy.",
+        "conflicts": []
+      }
+    },
+    {
+      "id": "canada-1960",
+      "polityId": "canada",
+      "featureId": "canada",
+      "file": "snapshot-1960.geojson",
+      "sourceIds": [
+        "historical-basemaps"
+      ],
+      "inputs": [
+        {
+          "url": "https://raw.githubusercontent.com/aourednik/historical-basemaps/master/geojson/world_1960.geojson",
+          "sha256": "6067386755f8fc120a4fca44f198952a18da89cd062aa8013d5a0d08cbad8988"
+        }
+      ],
+      "regions": [
+        "north-america"
+      ],
+      "coverage": "partial",
+      "representation": "source-political",
+      "time": {
+        "kind": "snapshot",
+        "year": 1960,
+        "precision": "year"
+      },
+      "precision": "generalized",
+      "review": "source-snapshot",
+      "evidenceIds": [],
+      "limitations": [
+        "Generalized source snapshot; independent historical boundary validation and local dispute coverage are incomplete."
+      ],
+      "disposition": {
+        "status": "legacy-published",
+        "reviewer": "Existing published bundle",
+        "reason": "Preserve the baseline review grade without promoting historical accuracy.",
+        "conflicts": []
+      }
+    },
+    {
+      "id": "usa-2010",
+      "polityId": "usa",
+      "featureId": "usa",
+      "file": "snapshot-2010.geojson",
+      "sourceIds": [
+        "historical-basemaps"
+      ],
+      "inputs": [
+        {
+          "url": "https://raw.githubusercontent.com/aourednik/historical-basemaps/master/geojson/world_2010.geojson",
+          "sha256": "d18dcbe41df5e68ec174e5f3887578142bf70fba72f56e204c9de5a8571ae0f4"
+        }
+      ],
+      "regions": [
+        "north-america"
+      ],
+      "coverage": "partial",
+      "representation": "source-political",
+      "time": {
+        "kind": "snapshot",
+        "year": 2010,
+        "precision": "year"
+      },
+      "precision": "generalized",
+      "review": "source-snapshot",
+      "evidenceIds": [],
+      "limitations": [
+        "Generalized source snapshot; independent historical boundary validation and local dispute coverage are incomplete."
+      ],
+      "disposition": {
+        "status": "legacy-published",
+        "reviewer": "Existing published bundle",
+        "reason": "Preserve the baseline review grade without promoting historical accuracy.",
+        "conflicts": []
+      }
+    },
+    {
+      "id": "mexico-2010",
+      "polityId": "mexico",
+      "featureId": "mexico",
+      "file": "snapshot-2010.geojson",
+      "sourceIds": [
+        "historical-basemaps"
+      ],
+      "inputs": [
+        {
+          "url": "https://raw.githubusercontent.com/aourednik/historical-basemaps/master/geojson/world_2010.geojson",
+          "sha256": "d18dcbe41df5e68ec174e5f3887578142bf70fba72f56e204c9de5a8571ae0f4"
+        }
+      ],
+      "regions": [
+        "north-america"
+      ],
+      "coverage": "partial",
+      "representation": "source-political",
+      "time": {
+        "kind": "snapshot",
+        "year": 2010,
+        "precision": "year"
+      },
+      "precision": "generalized",
+      "review": "source-snapshot",
+      "evidenceIds": [],
+      "limitations": [
+        "Generalized source snapshot; independent historical boundary validation and local dispute coverage are incomplete."
+      ],
+      "disposition": {
+        "status": "legacy-published",
+        "reviewer": "Existing published bundle",
+        "reason": "Preserve the baseline review grade without promoting historical accuracy.",
+        "conflicts": []
+      }
+    },
+    {
+      "id": "canada-2010",
+      "polityId": "canada",
+      "featureId": "canada",
+      "file": "snapshot-2010.geojson",
+      "sourceIds": [
+        "historical-basemaps"
+      ],
+      "inputs": [
+        {
+          "url": "https://raw.githubusercontent.com/aourednik/historical-basemaps/master/geojson/world_2010.geojson",
+          "sha256": "d18dcbe41df5e68ec174e5f3887578142bf70fba72f56e204c9de5a8571ae0f4"
+        }
+      ],
+      "regions": [
+        "north-america"
+      ],
+      "coverage": "partial",
+      "representation": "source-political",
+      "time": {
+        "kind": "snapshot",
+        "year": 2010,
+        "precision": "year"
+      },
+      "precision": "generalized",
+      "review": "source-snapshot",
+      "evidenceIds": [],
+      "limitations": [
+        "Generalized source snapshot; independent historical boundary validation and local dispute coverage are incomplete."
+      ],
+      "disposition": {
+        "status": "legacy-published",
+        "reviewer": "Existing published bundle",
+        "reason": "Preserve the baseline review grade without promoting historical accuracy.",
+        "conflicts": []
+      }
+    }
+  ],
+  "evidence": [],
+  "events": [],
+  "revision": "d7b64602f01baa4946fa525c0cda80e6fbc0073f192215f0b5f1d3cf86fb5bc6"
 }

@@ -1,6 +1,7 @@
 import { mkdir, writeFile, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fetchSource } from './source-cache.mjs';
+import { boundaryManifest } from './boundary-manifest.mjs';
 import { union } from '@turf/union';
 import { featureCollection } from '@turf/helpers';
 
@@ -16,6 +17,7 @@ export async function buildBundle({ cacheDir, outputDir, refresh }) {
     });
 
   const snapshots = [];
+  const collections = new Map();
   // Earlier candidates and 1900 failed ownership checks against primary sources.
   // Small coverage is preferable to knowingly displaying an incorrect state.
   const years = [1880, 1938, 1960, 2010];
@@ -125,6 +127,7 @@ export async function buildBundle({ cacheDir, outputDir, refresh }) {
       throw new Error(`United States absent at ${year}`);
     const file = `snapshot-${year}.geojson`;
     await writeFile(join(outputDir, file), JSON.stringify({ type: 'FeatureCollection', features }));
+    collections.set(year, { type: 'FeatureCollection', features });
     snapshots.push({
       year,
       file,
@@ -184,35 +187,38 @@ export async function buildBundle({ cacheDir, outputDir, refresh }) {
   await writeFile(
     join(outputDir, 'manifest.json'),
     JSON.stringify(
-      {
-        schemaVersion: 1,
-        range: [1776, 2026],
-        snapshots,
-        sources,
-        landInput: { url: land.url, sha256: land.hash },
-        excludedSnapshots: [
-          {
-            years: [1783, 1800, 1815],
-            reason:
-              'Containment checks put Jacksonville, Florida within the United States before the 1821 transfer. No repaired historical geometry available.',
-            evidence: 'https://history.state.gov/milestones/1801-1829/florida',
-          },
-          {
-            years: [1815, 1900],
-            reason:
-              'Containment checks put Newfoundland within Canada before its 1949 entry. No verified same-year replacement available.',
-            evidence:
-              'https://parks.canada.ca/culture/designation/evenement-event/terre-neuve-confederation-newfoundland',
-          },
-        ],
-        limitations: [
-          'Four snapshot years, not continuous historical coverage. Other years deliberately have no territorial polygons.',
-          'Only the 1880 Canada/Newfoundland geometry is drawn from a government historical polygon service. Other historical shapes are generalized source references, not fully vetted boundaries.',
-          'Early colonial claims are not effective control. Indigenous territories are not yet mapped; neutral areas do not imply uninhabited or unclaimed land.',
-          'A complete disputed-boundary layer is not yet available. No disputed areas are invented.',
-          'Nearby island and predecessor coverage is incomplete. Overseas dependencies are outside this pilot.',
-        ],
-      },
+      boundaryManifest(
+        {
+          schemaVersion: 1,
+          range: [1776, 2026],
+          snapshots,
+          sources,
+          landInput: { url: land.url, sha256: land.hash },
+          excludedSnapshots: [
+            {
+              years: [1783, 1800, 1815],
+              reason:
+                'Containment checks put Jacksonville, Florida within the United States before the 1821 transfer. No repaired historical geometry available.',
+              evidence: 'https://history.state.gov/milestones/1801-1829/florida',
+            },
+            {
+              years: [1815, 1900],
+              reason:
+                'Containment checks put Newfoundland within Canada before its 1949 entry. No verified same-year replacement available.',
+              evidence:
+                'https://parks.canada.ca/culture/designation/evenement-event/terre-neuve-confederation-newfoundland',
+            },
+          ],
+          limitations: [
+            'Four snapshot years, not continuous historical coverage. Other years deliberately have no territorial polygons.',
+            'Only the 1880 Canada/Newfoundland geometry is drawn from a government historical polygon service. Other historical shapes are generalized source references, not fully vetted boundaries.',
+            'Early colonial claims are not effective control. Indigenous territories are not yet mapped; neutral areas do not imply uninhabited or unclaimed land.',
+            'A complete disputed-boundary layer is not yet available. No disputed areas are invented.',
+            'Nearby island and predecessor coverage is incomplete. Overseas dependencies are outside this pilot.',
+          ],
+        },
+        collections,
+      ),
       null,
       2,
     ),

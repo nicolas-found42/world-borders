@@ -146,3 +146,45 @@ test('a delayed snapshot remains unready until its boundaries arrive', async ({ 
     release();
   }
 });
+
+test('malformed geometry is an error, pauses playback and can be retried', async ({ page }) => {
+  await page.route('**/data/snapshot-1938.geojson', (route) =>
+    route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({ type: 'FeatureCollection', features: [] }),
+    }),
+  );
+  await page.getByRole('button', { name: 'View 1938 snapshot', exact: true }).click();
+  await expect(page.locator('.app')).toHaveAttribute('data-coverage', 'error');
+  await expect(page.locator('.app')).toHaveAttribute('data-playing', 'false');
+  await expect(page.getByRole('alert')).toContainText('Invalid boundary data');
+  await expect(page.locator('.territory-legend')).toHaveCount(0);
+  await page.unroute('**/data/snapshot-1938.geojson');
+  await page.getByRole('button', { name: 'Retry' }).click();
+  await expect(page.locator('.app')).toHaveAttribute('data-loaded-year', '1938');
+});
+
+test('seeking away from delayed geometry never restores the obsolete legend', async ({ page }) => {
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  await page.route('**/data/snapshot-1938.geojson', async (route) => {
+    await gate;
+    await route.continue().catch(() => {});
+  });
+  try {
+    await page.getByRole('button', { name: 'View 1938 snapshot', exact: true }).click();
+    await expect(page.locator('.app')).toHaveAttribute('data-loading', 'true');
+    const input = page.getByRole('spinbutton', { name: 'Jump to year' });
+    await input.fill('1776');
+    await input.press('Enter');
+    release();
+    await expect(page.locator('.app')).toHaveAttribute('data-year', '1776');
+    await expect(page.locator('.app')).toHaveAttribute('data-loaded-year', '');
+    await expect(page.locator('.app')).toHaveAttribute('data-coverage', 'gap');
+    await expect(page.locator('.territory-legend')).toHaveCount(0);
+  } finally {
+    release();
+  }
+});

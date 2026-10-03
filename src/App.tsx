@@ -1,4 +1,5 @@
 import { assetUrl } from './urls';
+import { createAssetLoader } from './asset-loader.mjs';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Globe2,
@@ -31,11 +32,6 @@ import {
   nearestSnapshot,
 } from './timeline.mjs';
 
-async function json<T>(url: string, signal?: AbortSignal): Promise<T> {
-  const response = await fetch(url, { signal });
-  if (!response.ok) throw new Error(`Could not load ${url} (${response.status})`);
-  return response.json();
-}
 const SPEEDS = [0.5, 1, 4, 12];
 const formatYear = (year: number) => String(Math.floor(year));
 
@@ -56,7 +52,9 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [loadedYear, setLoadedYear] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const cache = useRef(new Map<number, Territory[]>());
+  const loader = useRef(createAssetLoader({ urlFor: assetUrl }));
+  const [bootAttempt, setBootAttempt] = useState(0);
+  const [loadedKey, setLoadedKey] = useState('');
   const yearRef = useRef(year);
   const timeline = useRef<HTMLDivElement>(null);
   const dialog = useRef<HTMLDialogElement>(null);
@@ -64,76 +62,74 @@ export default function App() {
     () => (manifest ? snapshotForYear(manifest.snapshots, year) : null),
     [manifest, Math.floor(year)],
   );
+  const states = useMemo(
+    () =>
+      manifest?.states.filter(
+        (s) => s.time.kind === 'snapshot' && s.time.year === Math.floor(year),
+      ) ?? [],
+    [manifest, Math.floor(year)],
+  );
+  const selectionKey = `${manifest?.revision ?? ''}:${states.map((s) => s.id).join(',')}`;
+  const visibleTerritories = loadedKey === selectionKey ? territories : [];
   const yearInteger = Math.floor(year);
   useEffect(() => setYearDraft(String(yearInteger)), [yearInteger]);
   useEffect(() => {
     yearRef.current = year;
   }, [year]);
-  const boot = useCallback(() => {
+  const boot = useCallback(() => setBootAttempt((value) => value + 1), []);
+  useEffect(() => {
+    const abort = new AbortController();
     setError(null);
     setLoading(true);
-    Promise.all([
-      json<Manifest>(assetUrl('data/manifest.json')),
-      json<{ features: Feature<Polygon | MultiPolygon>[] }>(assetUrl('data/land.geojson')),
-    ])
-      .then(([m, l]) => {
+    setManifest(null);
+    setTerritories([]);
+    setLoadedKey('');
+    loader.current
+      .boot(abort.signal)
+      .then(({ manifest: m, land: l }) => {
+        if (abort.signal.aborted) return;
         setManifest(m);
-        setLand(l.features);
+        setLand(l);
       })
       .catch((e) => {
+        if (abort.signal.aborted) return;
         setError(e.message);
         setLoading(false);
+        setPlaying(false);
       });
-  }, []);
-  useEffect(boot, [boot]);
+    return () => abort.abort();
+  }, [bootAttempt]);
   useEffect(() => {
     if (!manifest) return;
     const abort = new AbortController();
     setHover(null);
     setFocus(null);
     setError(null);
-    if (!snapshot) {
-      setTerritories([]);
-      setLoadedYear(null);
-      setLoading(false);
-      return () => abort.abort();
-    }
-    const cached = cache.current.get(snapshot.year);
-    if (cached) {
-      setTerritories(cached);
-      setLoadedYear(snapshot.year);
-      setLoading(false);
-      return () => abort.abort();
-    }
-    // Clear stale territory while a new date loads: mismatched date/geometry is never shown.
     setTerritories([]);
     setLoadedYear(null);
+    setLoadedKey('');
+    if (!states.length) {
+      setLoading(false);
+      return () => abort.abort();
+    }
     setLoading(true);
-    json<{ features: Territory[] }>(assetUrl(`data/${snapshot.file}`), abort.signal)
-      .then((data) => {
-        cache.current.set(snapshot.year, data.features);
-        setTerritories(data.features);
-        setLoadedYear(snapshot.year);
+    loader.current
+      .loadStates(manifest, states, abort.signal)
+      .then((features) => {
+        if (abort.signal.aborted) return;
+        setTerritories(features);
+        setLoadedYear(Math.floor(year));
+        setLoadedKey(selectionKey);
         setLoading(false);
       })
       .catch((e) => {
-        if (e.name !== 'AbortError') {
-          setError(e.message);
-          setLoading(false);
-          setPlaying(false);
-        }
+        if (abort.signal.aborted) return;
+        setError(e.message);
+        setLoading(false);
+        setPlaying(false);
       });
     return () => abort.abort();
-  }, [manifest, snapshot]);
-  useEffect(() => {
-    if (!manifest || !snapshot) return;
-    const next =
-      manifest.snapshots[manifest.snapshots.findIndex((s) => s.year === snapshot.year) + 1];
-    if (next && !cache.current.has(next.year))
-      json<{ features: Territory[] }>(assetUrl(`data/${next.file}`))
-        .then((d) => cache.current.set(next.year, d.features))
-        .catch(() => {});
-  }, [manifest, snapshot]);
+  }, [manifest, states, selectionKey]);
   useEffect(() => {
     if (!playing || loading || !ready) return;
     let frame: number;
@@ -219,25 +215,27 @@ export default function App() {
   const onReady = useCallback(() => setReady(true), []);
   const distinct = useMemo(() => {
     const order = ['usa', 'canada', 'mexico', 'hawaii', 'newfoundland'];
-    return territories
+    return visibleTerritories
       .filter((f, i, all) => all.findIndex((a) => a.properties.id === f.properties.id) === i)
       .sort((a, b) => order.indexOf(a.properties.id) - order.indexOf(b.properties.id));
-  }, [territories]);
+  }, [visibleTerritories]);
   const progress = ((year - START_YEAR) / (END_YEAR - START_YEAR)) * 100;
   const available = manifest?.snapshots.map((s) => s.year) ?? [];
   const previousDisabled = !manifest || adjacentSnapshot(manifest.snapshots, year, -1) === null;
   const nextDisabled = !manifest || adjacentSnapshot(manifest.snapshots, year, 1) === null;
   const currentSources =
-    manifest?.sources.filter((s) => territories.some((f) => f.properties.sourceId === s.id)) ?? [];
+    manifest?.sources.filter((s) =>
+      visibleTerritories.some((f) => f.properties.sourceId === s.id),
+    ) ?? [];
   return (
     <main
       className="app"
       data-playing={playing}
-      data-loaded-year={loadedYear ?? ''}
+      data-loaded-year={loadedKey === selectionKey ? (loadedYear ?? '') : ''}
       data-loading={loading}
       data-error={error ?? ''}
       data-year={yearInteger}
-      data-coverage={snapshot ? 'snapshot' : 'gap'}
+      data-coverage={error ? 'error' : loading ? 'loading' : snapshot ? 'partial' : 'gap'}
     >
       <header className="topbar">
         <a className="brand" href={assetUrl('')} aria-label="World Borders home">
@@ -261,7 +259,7 @@ export default function App() {
         <div className="orbit-ring ring-two" />
         {land.length > 0 && (
           <GlobeView
-            territories={territories}
+            territories={visibleTerritories}
             land={land}
             resetToken={resetToken}
             focus={focus}
@@ -280,14 +278,16 @@ export default function App() {
           </div>
           <div className="coverage-status">
             <span className={snapshot ? 'status-dot' : 'status-dot dim'} />
-            {loading
-              ? 'Loading borders'
-              : snapshot
-                ? 'Sourced snapshot'
-                : 'No snapshot for this year'}
+            {error
+              ? 'Borders unavailable — load error'
+              : loading
+                ? 'Loading borders'
+                : snapshot
+                  ? 'Reference snapshot · partial coverage'
+                  : 'No snapshot for this year'}
           </div>
           <div className="date-rule" />
-          {snapshot && !loading && (
+          {snapshot && !loading && !error && loadedKey === selectionKey && (
             <>
               <div className="legend-title">TERRITORIES</div>
               <div className="territory-legend">
@@ -312,7 +312,7 @@ export default function App() {
               )}
             </>
           )}
-          {!snapshot && !loading && manifest && (
+          {!snapshot && !loading && !error && manifest && (
             <button
               className="nearest-button"
               onClick={() => {
@@ -556,6 +556,12 @@ export default function App() {
                 <div className="current-snapshot">
                   <h3>Current snapshot · {snapshot.year}</h3>
                   <p>{currentSources.map((s) => s.name).join(' + ') || 'Loading source details'}</p>
+                  {states.map((s) => (
+                    <p key={s.id}>
+                      {manifest?.polities.find((p) => p.id === s.polityId)?.name}: {s.review} ·{' '}
+                      {s.representation}. {s.limitations.join(' ')}
+                    </p>
+                  ))}
                   {snapshot.corrections.map((c) => (
                     <p key={c}>{c}</p>
                   ))}
