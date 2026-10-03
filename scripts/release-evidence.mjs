@@ -66,15 +66,37 @@ export function releaseProblems(evidence, { phase, reviewedHead, reviewNote }) {
   }
   return problems;
 }
+export function newReviewActivity(current, previous) {
+  const knownComments = new Map(
+    previous.pr.reviewThreads.nodes
+      .flatMap((thread) => thread.comments?.nodes || [])
+      .map((comment) => [comment.id, comment.updatedAt]),
+  );
+  const comments = current.pr.reviewThreads.nodes
+    .flatMap((thread) => thread.comments?.nodes || [])
+    .filter((comment) => knownComments.get(comment.id) !== comment.updatedAt);
+  const stamp = (review) =>
+    JSON.stringify([review.state, review.submittedAt, review.updatedAt, review.commit?.oid]);
+  const knownReviews = new Map(
+    (previous.pr.reviews?.nodes || []).map((review) => [review.id, stamp(review)]),
+  );
+  const reviews = (current.pr.reviews?.nodes || []).filter(
+    (review) => knownReviews.get(review.id) !== stamp(review),
+  );
+  const knownThreads = new Set(previous.pr.reviewThreads.nodes.map((thread) => thread.id));
+  const threads = current.pr.reviewThreads.nodes.filter((thread) => !knownThreads.has(thread.id));
+  return { comments, reviews, threads };
+}
 async function collect(number) {
   const repository = process.env.GITHUB_REPOSITORY || 'nicolas-found42/world-borders';
   const [owner, name] = repository.split('/');
-  const query = `query($owner:String!,$name:String!,$number:Int!){repository(owner:$owner,name:$name){defaultBranchRef{target{oid}} pullRequest(number:$number){url body author{login __typename} state isDraft headRefOid baseRefOid mergeable mergeStateStatus mergedAt reviewDecision mergeCommit{oid} closingIssuesReferences(first:100){nodes{number state stateReason repository{nameWithOwner}} pageInfo{hasNextPage}} reviewThreads(first:100){nodes{id isResolved comments(first:1){nodes{url createdAt path}}} pageInfo{hasNextPage}} reviews(last:100){nodes{author{login __typename} state submittedAt commit{oid} url} pageInfo{hasPreviousPage}} commits(last:1){nodes{commit{oid statusCheckRollup{contexts(first:100){nodes{__typename ... on CheckRun{name status conclusion detailsUrl} ... on StatusContext{context state targetUrl}} pageInfo{hasNextPage}}}}}}}}}`;
+  const query = `query($owner:String!,$name:String!,$number:Int!){repository(owner:$owner,name:$name){defaultBranchRef{target{oid}} pullRequest(number:$number){url body author{login __typename} state isDraft headRefOid baseRefOid mergeable mergeStateStatus mergedAt reviewDecision mergeCommit{oid} closingIssuesReferences(first:100){nodes{number state stateReason repository{nameWithOwner}} pageInfo{hasNextPage}} reviewThreads(first:100){nodes{id isResolved comments(last:100){nodes{id url createdAt updatedAt path} pageInfo{hasPreviousPage}}} pageInfo{hasNextPage}} reviews(last:100){nodes{author{login __typename} state submittedAt commit{oid} url} pageInfo{hasPreviousPage}} commits(last:1){nodes{commit{oid statusCheckRollup{contexts(first:100){nodes{__typename ... on CheckRun{name status conclusion detailsUrl} ... on StatusContext{context state targetUrl}} pageInfo{hasNextPage}}}}}}}}}`;
   const { repository: data } = githubQuery(query, { owner, name, number });
   const pr = data.pullRequest;
   if (
     !pr ||
     pr.reviewThreads.pageInfo.hasNextPage ||
+    pr.reviewThreads.nodes.some((thread) => thread.comments.pageInfo.hasPreviousPage) ||
     pr.reviews.pageInfo.hasPreviousPage ||
     pr.closingIssuesReferences.pageInfo.hasNextPage ||
     pr.commits.nodes[0]?.commit.statusCheckRollup?.contexts.pageInfo.hasNextPage
@@ -182,11 +204,10 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   });
   if (values.previous) {
     const previous = JSON.parse(await readFile(values.previous, 'utf8'));
-    const known = new Set(previous.pr.reviewThreads.nodes.map((t) => t.id));
-    evidence.newThreads = evidence.pr.reviewThreads.nodes.filter((t) => !known.has(t.id));
-    if (evidence.newThreads.length)
+    evidence.newReviewActivity = newReviewActivity(evidence, previous);
+    if (Object.values(evidence.newReviewActivity).some((items) => items.length))
       evidence.problems.push(
-        'New review threads since previous inspection; disposition and repeat inspection required',
+        'New or edited review activity since previous inspection; disposition and repeat inspection required',
       );
   }
   const output = values.output || `artifacts/release-evidence/pr-${number}-${values.phase}.json`;

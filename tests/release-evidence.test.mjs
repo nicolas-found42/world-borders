@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { validateClosingIssues, isDependencyBot } from '../scripts/pr-metadata.mjs';
-import { releaseProblems } from '../scripts/release-evidence.mjs';
+import { releaseProblems, newReviewActivity } from '../scripts/release-evidence.mjs';
 const repo = 'nicolas-found42/world-borders';
 const ref = (number) => ({ number, repository: { nameWithOwner: repo } });
 
@@ -107,4 +107,30 @@ test('only the actual dependency bot may omit an empty declaration', () => {
       validateClosingIssues('Automated update closes #1', [ref(1)], repo, { dependencyBot: true }),
     /GitHub parsed/,
   );
+});
+
+test('late replies and edited comments in an existing resolved thread require another inspection', () => {
+  const previous = {
+    pr: {
+      reviewThreads: {
+        nodes: [
+          {
+            id: 'thread',
+            isResolved: true,
+            comments: { nodes: [{ id: 'comment', updatedAt: 'before' }] },
+          },
+        ],
+      },
+      reviews: { nodes: [{ id: 'review', state: 'COMMENTED', submittedAt: 'before' }] },
+    },
+  };
+  const current = structuredClone(previous);
+  current.pr.reviewThreads.nodes[0].comments.nodes[0].updatedAt = 'after';
+  current.pr.reviewThreads.nodes[0].comments.nodes.push({ id: 'late-reply', updatedAt: 'after' });
+  current.pr.reviews.nodes.push({ id: 'late-review', state: 'COMMENTED', submittedAt: 'after' });
+  const activity = newReviewActivity(current, previous);
+  assert.equal(activity.comments.length, 2);
+  assert.equal(activity.reviews.length, 1);
+  assert.equal(activity.threads.length, 0);
+  assert.deepEqual(newReviewActivity(current, current), { comments: [], reviews: [], threads: [] });
 });

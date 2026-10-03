@@ -24,7 +24,8 @@ After merge, main checks and deployment, run again:
 npm run release:evidence -- PR_NUMBER --phase complete --reviewed-head HEAD_SHA --review-note 'Final head review disposition' --previous artifacts/release-evidence/pr-PR_NUMBER-premerge.json
 ```
 
-New review threads since the earlier inspection fail the command even after merge.
+New threads, replies, submitted reviews, and edited review comments since the earlier
+inspection fail the command even after merge.
 Inspect and disposition them, then save a new observation as the previous baseline
 and repeat. Completion also requires the deployed SHA to match the checked current
 main, an integrated merge and closed completed issues. The JSON retains full evidence;
