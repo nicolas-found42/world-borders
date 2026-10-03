@@ -221,6 +221,8 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     throw new Error(
       'Usage: npm run release:evidence -- PR --phase premerge|complete --reviewed-head SHA --review-note NOTE',
     );
+  if (values.phase === 'complete' && !values.previous)
+    throw new Error('Completion requires --previous for the matching premerge observation');
   const evidence = await collect(number);
   evidence.reviewConfirmation = { head: values['reviewed-head'], note: values['review-note'] };
   if (values.previous) {
@@ -231,7 +233,13 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
       previous.pr.url !== evidence.pr.url
     )
       throw new Error('Previous evidence must belong to the same PR and reviewed head');
-    evidence.requiredChecksAtMerge = previous.requiredChecksAtMerge || previous.requiredChecks;
+    const savedChecks = previous.requiredChecksAtMerge || previous.requiredChecks;
+    if (
+      !Array.isArray(savedChecks) ||
+      savedChecks.some((name) => typeof name !== 'string' || !name)
+    )
+      throw new Error('Previous evidence lacks a valid merge-check snapshot');
+    evidence.requiredChecksAtMerge = savedChecks;
     evidence.newReviewActivity = newReviewActivity(evidence, previous);
   }
   evidence.problems = releaseProblems(evidence, {

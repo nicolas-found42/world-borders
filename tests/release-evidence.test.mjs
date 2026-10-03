@@ -151,3 +151,14 @@ test('completion preserves checks required at merge while premerge enforces curr
     /Required check did not pass: verify/,
   );
 });
+
+test('completion CLI requires the prior observation before contacting GitHub', async () => {
+  const { spawnSync } = await import('node:child_process');
+  const result = spawnSync(
+    process.execPath,
+    ['scripts/release-evidence.mjs', '14', '--phase', 'complete'],
+    { encoding: 'utf8' },
+  );
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /Completion requires --previous/);
+});
