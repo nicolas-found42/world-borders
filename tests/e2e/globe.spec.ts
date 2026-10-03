@@ -33,6 +33,7 @@ test('@smoke prefixed app loads all snapshots, assets and build revision', async
   for (const year of [1880, 1938, 1960, 2010]) {
     await page.getByRole('button', { name: `View ${year} snapshot`, exact: true }).click();
     await expect(page.locator('.app')).toHaveAttribute('data-year', String(year));
+    await expect(page.locator('.app')).toHaveAttribute('data-loaded-year', String(year));
     await expect(page.locator('.territory-legend')).toContainText('United States');
   }
   const info = await request.get(new URL('build-info.json', baseURL).href);
@@ -117,4 +118,29 @@ test('mobile controls remain visible without horizontal overflow', async ({ page
   await page.getByRole('button', { name: 'Sources & coverage', exact: true }).click();
   await expect(page.locator('dialog')).toHaveJSProperty('open', true);
   await page.getByRole('button', { name: 'Close panel' }).click();
+});
+
+test('a delayed snapshot remains unready until its boundaries arrive', async ({ page }) => {
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  await page.route('**/data/snapshot-1938.geojson', async (route) => {
+    await gate;
+    await route.continue();
+  });
+  try {
+    await page.reload();
+    await expect(page.getByRole('button', { name: 'Play timeline', exact: true })).toBeEnabled();
+    await page.getByRole('button', { name: 'View 1938 snapshot', exact: true }).click();
+    await expect(page.locator('.app')).toHaveAttribute('data-loading', 'true');
+    await expect(page.locator('.app')).toHaveAttribute('data-loaded-year', '');
+    await expect(page.locator('.territory-legend')).toHaveCount(0);
+    release();
+    await expect(page.locator('.app')).toHaveAttribute('data-loaded-year', '1938');
+    await expect(page.locator('.territory-legend')).toContainText('United States');
+    await expect(page.locator('.app')).toHaveAttribute('data-error', '');
+  } finally {
+    release();
+  }
 });

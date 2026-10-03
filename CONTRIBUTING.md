@@ -78,7 +78,8 @@ monthly. The schedule was enabled after testing cache invalidation and a real
 fresh-input/cached-input replay. The workflow:
 
 1. Saves the committed bundle, fetches fresh sources, regenerates, and verifies a
-   second build from those cached inputs is byte-identical.
+   second build from those cached inputs is byte-identical. Cache and output are
+   staged as a set; a failed fetch/build preserves both previous directories.
 2. Runs deterministic checks and Chromium, then records exact before/after input
    and output hashes, coverage, attribution, licenses, exclusions and map images.
 3. Runs an advisory Jev review with the repository's OpenRouter secret. Evidence,

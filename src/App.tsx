@@ -54,6 +54,7 @@ export default function App() {
   const [resetToken, setResetToken] = useState(0);
   const [ready, setReady] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [loadedYear, setLoadedYear] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const cache = useRef(new Map<number, Territory[]>());
   const yearRef = useRef(year);
@@ -93,22 +94,26 @@ export default function App() {
     setError(null);
     if (!snapshot) {
       setTerritories([]);
+      setLoadedYear(null);
       setLoading(false);
       return () => abort.abort();
     }
     const cached = cache.current.get(snapshot.year);
     if (cached) {
       setTerritories(cached);
+      setLoadedYear(snapshot.year);
       setLoading(false);
       return () => abort.abort();
     }
     // Clear stale territory while a new date loads: mismatched date/geometry is never shown.
     setTerritories([]);
+    setLoadedYear(null);
     setLoading(true);
     json<{ features: Territory[] }>(assetUrl(`data/${snapshot.file}`), abort.signal)
       .then((data) => {
         cache.current.set(snapshot.year, data.features);
         setTerritories(data.features);
+        setLoadedYear(snapshot.year);
         setLoading(false);
       })
       .catch((e) => {
@@ -228,6 +233,9 @@ export default function App() {
     <main
       className="app"
       data-playing={playing}
+      data-loaded-year={loadedYear ?? ''}
+      data-loading={loading}
+      data-error={error ?? ''}
       data-year={yearInteger}
       data-coverage={snapshot ? 'snapshot' : 'gap'}
     >

@@ -94,6 +94,7 @@ async function run(output) {
   const input = { model: 'typesafe/jev-1.13', state: { evidence, documents }, questions };
   await writeFile(join(output, 'jev-input.json'), JSON.stringify(input, null, 2));
   let result;
+  let response;
   try {
     if (!process.env.OPENROUTER_API_KEY) throw new Error('OPENROUTER_API_KEY is unavailable');
     const client = new TypeSafeClient({
@@ -102,11 +103,12 @@ async function run(output) {
       timeout: 60000,
       retry: { maxRetries: 1 },
     });
-    const response = await client.systemOne(input);
+    response = await client.systemOne(input);
     result = { input, response, disposition: disposition(response.answers) };
   } catch (error) {
     result = {
       input,
+      response,
       error: error.message,
       disposition: { publication: 'human-review-required', flags: ['advisory-unavailable'] },
     };

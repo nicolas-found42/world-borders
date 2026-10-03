@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { mkdtemp, mkdir, writeFile, readFile, rm } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -19,7 +20,7 @@ test('changed-data proposal pushes only a review branch and requests a draft; du
   const calls = join(root, 'gh-calls.jsonl');
   await writeFile(
     join(bin, 'gh'),
-    `#!/usr/bin/env node\nconst fs = require('node:fs');\nconst args = process.argv.slice(2);\nfs.appendFileSync(process.env.CALLS, JSON.stringify(args)+'\\n');\nconsole.log(args[1] === 'list' ? (process.env.PROPOSAL_EXISTS ? '[{"url":"https://example.test/pr/1"}]' : '[]') : 'https://example.test/pr/1');\n`,
+    `#!/usr/bin/env node\nconst fs = require('node:fs');\nconst args = process.argv.slice(2);\nfs.appendFileSync(process.env.CALLS, JSON.stringify(args)+'\\n');\nif (args[1] === 'create' && process.env.FAIL_CREATE) process.exit(23);\nconsole.log(args[1] === 'list' ? (process.env.PROPOSAL_EXISTS ? '[{"url":"https://example.test/pr/1"}]' : '[]') : 'https://example.test/pr/1');\n`,
     { mode: 0o755 },
   );
   const env = {
@@ -50,11 +51,20 @@ test('changed-data proposal pushes only a review branch and requests a draft; du
       reportPath,
       JSON.stringify({
         changedFiles: ['manifest.json'],
-        after: { files: { 'manifest.json': { sha256: 'abc' } } },
+        after: {
+          files: {
+            'manifest.json': {
+              sha256: createHash('sha256').update('{"refreshed":true}').digest('hex'),
+            },
+          },
+        },
       }),
     );
     await writeFile(join(cwd, 'artifacts/data-review/report.md'), 'Observed source evidence');
+    assert.throws(() => run({ FAIL_CREATE: '1' }));
+    const pushedHead = git('rev-parse', 'HEAD');
     run();
+    assert.equal(git('rev-parse', 'HEAD'), pushedHead, 'Recovery must reuse the pushed commit');
     const branch = git('branch', '--show-current');
     assert.match(branch, /^codex\/data-refresh-[a-f0-9]{12}$/);
     assert.equal(git('rev-parse', 'origin/main'), main);

@@ -70,6 +70,22 @@ try {
         (y) => document.querySelector('.app')?.getAttribute('data-year') === String(y),
         year,
       );
+      const hasSnapshot = manifests[label === 'before' ? 0 : 1].snapshots.some(
+        (s) => s.year === year,
+      );
+      await page.waitForFunction(
+        ({ year, hasSnapshot }) => {
+          const app = document.querySelector('.app');
+          return (
+            app?.getAttribute('data-error') ||
+            (app?.getAttribute('data-loading') === 'false' &&
+              app?.getAttribute('data-loaded-year') === (hasSnapshot ? String(year) : ''))
+          );
+        },
+        { year, hasSnapshot },
+      );
+      const error = await page.locator('.app').getAttribute('data-error');
+      if (error) throw new Error(`Map data failed: ${error}`);
       await page.waitForTimeout(1500); // Complete the initial camera tween and GPU draw.
       await page.screenshot({ path: join(output, `${label}-${year}.png`) });
     }
