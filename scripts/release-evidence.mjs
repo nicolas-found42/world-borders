@@ -93,17 +93,18 @@ export function applyPreviousObservation(evidence, previous, phase, disposition)
     evidence.requiredChecksAtMerge = savedChecks;
     evidence.mergeRequirementsVerified = true;
   }
+  evidence.reviewActivityDispositions = [...(previous.reviewActivityDispositions || [])];
   const activity = previous.newReviewActivity;
   if (activity && Object.values(activity).some((items) => items.length)) {
     if (!disposition?.trim())
       throw new Error(
         'Prior late review activity requires --review-activity-disposition before continuation',
       );
-    evidence.reviewActivityDisposition = {
+    evidence.reviewActivityDispositions.push({
       previousCollectedAt: previous.collectedAt,
       activity,
       note: disposition,
-    };
+    });
   }
   evidence.newReviewActivity = newReviewActivity(evidence, previous);
 }

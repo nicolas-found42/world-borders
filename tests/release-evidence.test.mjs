@@ -233,6 +233,33 @@ test('a late-review completion cannot be silently used as the next baseline', ()
     'complete',
     'Inspected reply: addressed in the merged regression; thread resolved.',
   );
-  assert.equal(current.reviewActivityDisposition.activity.comments[0].id, 'reply');
-  assert.match(current.reviewActivityDisposition.note, /merged regression/);
+  assert.equal(current.reviewActivityDispositions[0].activity.comments[0].id, 'reply');
+  assert.match(current.reviewActivityDispositions[0].note, /merged regression/);
+});
+
+test('dispositions remain in final evidence through transient failures and subsequent activity', () => {
+  const previous = {
+    ...fixture(),
+    phase: 'complete',
+    mergeRequirementsVerified: true,
+    requiredChecksAtMerge: ['verify'],
+    reviewActivityDispositions: [
+      { note: 'Earlier repair', activity: { comments: [{ id: 'old' }] } },
+    ],
+  };
+  const current = fixture();
+  applyPreviousObservation(current, previous, 'complete');
+  assert.deepEqual(current.reviewActivityDispositions, previous.reviewActivityDispositions);
+  current.phase = 'complete';
+  current.problems = ['deployment still pending'];
+  current.newReviewActivity = { comments: [{ id: 'new' }], reviews: [], threads: [] };
+  const later = fixture();
+  applyPreviousObservation(later, current, 'complete', 'New reply inspected and repaired');
+  assert.equal(later.reviewActivityDispositions.length, 2);
+  assert.equal(later.reviewActivityDispositions[0].note, 'Earlier repair');
+  assert.equal(later.reviewActivityDispositions[1].activity.comments[0].id, 'new');
+  later.phase = 'complete';
+  const final = fixture();
+  applyPreviousObservation(final, later, 'complete');
+  assert.deepEqual(final.reviewActivityDispositions, later.reviewActivityDispositions);
 });
