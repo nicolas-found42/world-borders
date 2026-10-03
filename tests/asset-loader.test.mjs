@@ -46,6 +46,9 @@ test('failed or malformed assets can be retried and cached assets belong to one 
   await assert.rejects(loader.loadStates(manifest, states), /nonempty/);
   assert.equal((await loader.loadStates(manifest, states)).length, 5);
   assert.equal((await loader.loadStates(manifest, states)).length, 5);
+  assert.throws(() => {
+    data.features[0].geometry.coordinates[0][0][1][0] += 0.01;
+  }, TypeError);
   assert.equal(calls, 3);
   await loader.loadStates({ ...manifest, revision: 'changed' }, states);
   assert.equal(calls, 4);
@@ -110,4 +113,26 @@ test('boot rejects a manifest whose contents do not match its declared revision'
   supplied = structuredClone(manifest);
   supplied.limitations.push('Changed without a new revision');
   await assert.rejects(loader.boot(), /manifest revision mismatch/);
+});
+
+test('network retries revalidate the HTTP cache for manifests and geometry', async () => {
+  const requests = [];
+  const land = JSON.parse(await readFile(new URL('../public/data/land.geojson', import.meta.url)));
+  const loader = createAssetLoader({
+    fetcher: async (path, options) => {
+      requests.push(options);
+      return {
+        ok: true,
+        json: async () =>
+          path.endsWith('manifest.json') ? manifest : path.endsWith('land.geojson') ? land : data,
+      };
+    },
+  });
+  await loader.boot();
+  await loader.loadStates(
+    manifest,
+    manifest.states.filter((s) => s.time.year === 1880),
+  );
+  assert.equal(requests.length, 3);
+  assert(requests.every((r) => r.cache === 'no-cache'));
 });

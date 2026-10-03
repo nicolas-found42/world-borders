@@ -1,4 +1,4 @@
-import { verifyAssetDigest } from '../src/asset-loader.mjs';
+import { verifyAssetDigest, verifyManifestRevision } from '../src/asset-loader.mjs';
 import {
   validateManifest,
   validateGeometry,
@@ -27,6 +27,7 @@ for (let attempt = 0; attempt < 24 && Date.now() < deadline; attempt++) {
     if (info.commit !== expectedCommit)
       throw new Error(`Expected ${expectedCommit}, received ${info.commit}`);
     const manifest = validateManifest(await get('data/manifest.json'));
+    await verifyManifestRevision(manifest);
     const land = validateGeometry(await get('data/land.geojson'));
     await verifyAssetDigest(manifest, 'land.geojson', land);
     for (const file of new Set(manifest.states.map((state) => state.file))) {

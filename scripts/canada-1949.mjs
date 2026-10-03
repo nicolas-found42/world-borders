@@ -36,6 +36,35 @@ function simplifyRing(ring, tolerance = 0.03) {
   const simplified = ring.filter((_, i) => keep.has(i));
   return simplified.length >= 4 ? simplified : ring;
 }
+const polygonParts = (geometry) =>
+  geometry.type === 'Polygon' ? [geometry.coordinates] : geometry.coordinates;
+function canonicalRing(ring) {
+  const points = ring.slice(0, -1).map((point) => JSON.stringify(point));
+  const first = points.indexOf([...points].sort()[0]);
+  const rotated = [...points.slice(first), ...points.slice(0, first)];
+  return [rotated.join(';'), [rotated[0], ...rotated.slice(1).reverse()].join(';')].sort()[0];
+}
+export function topologySignature(geometry) {
+  return polygonParts(geometry)
+    .map((polygon) => polygon.map(canonicalRing).sort().join('|'))
+    .sort()
+    .join('||');
+}
+export function simplifyCanadaGeometry(geometry) {
+  for (const tolerance of [0.03, 0.01, 0.003, 0.001, 0.0003, 0]) {
+    const candidate = {
+      type: 'MultiPolygon',
+      coordinates: polygonParts(geometry).map((polygon) =>
+        polygon.map((ring) => (tolerance ? simplifyRing(ring, tolerance) : ring)),
+      ),
+    };
+    const feature = { type: 'Feature', properties: {}, geometry: candidate };
+    const normalized = union(featureCollection([feature, feature]));
+    if (normalized && topologySignature(candidate) === topologySignature(normalized.geometry))
+      return { geometry: candidate, tolerance };
+  }
+  throw new Error('Canadian geometry fails topology normalization; curator review required');
+}
 export function prepareCanada1949(source) {
   validateGeometry(source.data);
   const divisions = source.data.features;
@@ -51,12 +80,12 @@ export function prepareCanada1949(source) {
     throw new Error('1949 source scope changed; curator review required');
   const merged = union(featureCollection(divisions));
   if (!merged) throw new Error('Could not dissolve Canadian divisions');
-  merged.geometry.coordinates = (
-    merged.geometry.type === 'Polygon' ? [merged.geometry.coordinates] : merged.geometry.coordinates
-  ).map((polygon) => polygon.map((ring) => simplifyRing(ring)));
-  merged.geometry.type = 'MultiPolygon';
+  const simplified = simplifyCanadaGeometry(merged.geometry);
+  merged.geometry = simplified.geometry;
   const collection = {
     type: 'FeatureCollection',
+    simplificationDegrees: simplified.tolerance,
+    topologyCheck: 'Self-union preserves canonical component, hole and ring boundaries',
     features: [
       {
         ...merged,
@@ -140,11 +169,11 @@ export function addCanada1949(manifest, source, record) {
       'Annual source depicts Canada after Newfoundland’s entry; the March 31 event does not establish day-valid geometry or an interval.',
       'US and Mexico geometry for 1949 is unavailable. Nearby-island, Indigenous and disputed-boundary coverage remains incomplete.',
       'Official generalized reference geometry, not independent historical boundary validation or effective-control evidence.',
-      'Unsimplified official divisions dissolved, then Douglas–Peucker simplification at 0.03 degrees retaining source boundary points. Government of Canada does not endorse this application.',
+      'Unsimplified official divisions dissolved, then Douglas–Peucker simplification starting at 0.03 degrees with finer or unsimplified fallback until topology normalization preserves every component, hole and ring boundary. Selected tolerance is recorded on the asset; source boundary points are retained. Government of Canada does not endorse this application.',
     ],
   };
   const transformation =
-    'Fetch official unsimplified divisions, dissolve to national outline, then simplify rings at 0.03 degrees retaining selected boundary points. Preserve small islands and holes.';
+    'Fetch official unsimplified divisions, dissolve to national outline, then simplify rings starting at 0.03 degrees, falling back to finer or unsimplified geometry until self-union preserves canonical component, hole and ring boundaries. Record the selected tolerance and retain source boundary points. Preserve small islands and holes.';
   state.disposition = publicationDisposition(source, record, {
     state,
     evidence,
@@ -167,7 +196,7 @@ export function addCanada1949(manifest, source, record) {
     ],
   });
   manifest.sources.find((s) => s.id === 'nrcan').note =
-    '1880 historical Canadian geometry uses service simplification at 0.03 degrees. For 1949, unsimplified official divisions are dissolved, then simplified with Douglas–Peucker at 0.03 degrees retaining source boundary points. Contains information licensed under the Open Government Licence – Canada (https://open.canada.ca/en/open-government-licence-canada). Government of Canada does not endorse this application.';
+    '1880 historical Canadian geometry uses service simplification at 0.03 degrees. For 1949, unsimplified official divisions are dissolved, then simplified with Douglas–Peucker starting at 0.03 degrees with finer or unsimplified fallback until topology normalization preserves every component, hole and ring boundary. Selected tolerance is recorded on the asset; source boundary points are retained. Contains information licensed under the Open Government Licence – Canada (https://open.canada.ca/en/open-government-licence-canada). Government of Canada does not endorse this application.';
   manifest.limitations[0] =
     'Five annual reference snapshots, including partial Canada 1949. No continuous coverage or verified 1776 geometry; other years show neutral land.';
   manifest.limitations[1] =

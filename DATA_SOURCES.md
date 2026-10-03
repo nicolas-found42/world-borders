@@ -32,7 +32,7 @@ Fontsource (DM Sans and Manrope, SIL Open Font License).
   not a survey-grade boundary or an assertion about day-by-day control.
 - For 1949: request all fourteen divisions without service simplification
   (`maxAllowableOffset=0`), dissolve the national outline, then simplify rings
-  at 0.03 degrees using Douglas–Peucker and retained boundary points. Small
+  starting at 0.03 degrees using Douglas–Peucker, with finer or unsimplified fallback until canonical self-union preserves every component, hole and ring boundary. The published tolerance is 0.01 degrees. Retain source boundary points. Small
   rings remain intact. Simplifying provinces separately created seams and was rejected.
 - The 1949 snapshot is an annual post-entry **legal-affiliation reference**,
   including Newfoundland/Labrador. US/Mexico remain unavailable. It is not

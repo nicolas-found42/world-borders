@@ -85,7 +85,7 @@
       "author": "Natural Resources Canada",
       "license": "Open Government Licence – Canada",
       "url": "https://open.canada.ca/data/dataset/e88ce995-b69a-4595-a752-bb06b061b5a3",
-      "note": "1880 historical Canadian geometry uses service simplification at 0.03 degrees. For 1949, unsimplified official divisions are dissolved, then simplified with Douglas–Peucker at 0.03 degrees retaining source boundary points. Contains information licensed under the Open Government Licence – Canada (https://open.canada.ca/en/open-government-licence-canada). Government of Canada does not endorse this application."
+      "note": "1880 historical Canadian geometry uses service simplification at 0.03 degrees. For 1949, unsimplified official divisions are dissolved, then simplified with Douglas–Peucker starting at 0.03 degrees with finer or unsimplified fallback until topology normalization preserves every component, hole and ring boundary. Selected tolerance is recorded on the asset; source boundary points are retained. Contains information licensed under the Open Government Licence – Canada (https://open.canada.ca/en/open-government-licence-canada). Government of Canada does not endorse this application."
     },
     {
       "id": "natural-earth",
@@ -799,12 +799,12 @@
         "Annual source depicts Canada after Newfoundland’s entry; the March 31 event does not establish day-valid geometry or an interval.",
         "US and Mexico geometry for 1949 is unavailable. Nearby-island, Indigenous and disputed-boundary coverage remains incomplete.",
         "Official generalized reference geometry, not independent historical boundary validation or effective-control evidence.",
-        "Unsimplified official divisions dissolved, then Douglas–Peucker simplification at 0.03 degrees retaining source boundary points. Government of Canada does not endorse this application."
+        "Unsimplified official divisions dissolved, then Douglas–Peucker simplification starting at 0.03 degrees with finer or unsimplified fallback until topology normalization preserves every component, hole and ring boundary. Selected tolerance is recorded on the asset; source boundary points are retained. Government of Canada does not endorse this application."
       ],
       "disposition": {
         "status": "approved-reference",
         "reviewer": "Codex, under Nicolas's bounded reference-review authorization",
-        "reason": "Approve the official generalized annual post-entry reference only. NRCan attribution/license and 1949 grouping, legal membership/1927 extent, interior ownership checks, ring validation, dissolution and visual review support this limited grade. Independent historical boundary validation, effective control and exact-day geometry remain unverified.",
+        "reason": "Approve the official generalized annual post-entry reference only. NRCan attribution/license and 1949 grouping, legal membership/1927 extent, interior ownership checks, ring validation, dissolution and visual review support this limited grade. Independent historical boundary validation, effective control and exact-day geometry remain unverified. Topology review found and corrected simplification-induced component connections. The revised 0.01-degree output preserves all 1,044 components and is unchanged under canonical self-union normalization.",
         "conflicts": []
       }
     }
@@ -865,11 +865,11 @@
       ]
     }
   ],
-  "revision": "85a02bb91ed6aaab0ab70364998c7fe09f09b7a24b4e7787f462b0bb3b606259",
+  "revision": "6a06902059b50f561b2d3bdbe6db61383c07e5385e0b12a61739d164db720f69",
   "assetDigests": {
     "snapshot-1880.geojson": "55513b2ec2be8dd012a5e603236337f4c9d952a29471bf4559254ddb3d0f8eec",
     "snapshot-1938.geojson": "a97572cd81a5f6239c6adfc075cfc2317f727e1738776128a6e1c9f6557efbe6",
-    "snapshot-1949.geojson": "cfc651f44dabf1d9611968ddbc6f3409b9c41cf7b5bb0ed8efcf8b65e1a0b1cd",
+    "snapshot-1949.geojson": "c0b406d8328d53c0fdebf54a0811c6a3d01ebed9b9d98a50bda9dad9852ec4ac",
     "snapshot-1960.geojson": "b20f2460c164262a2ed8ac5eba55784ae4d162da1836bc8a91da10232f54286e",
     "snapshot-2010.geojson": "029754b4e66bd857a677a681c80be127670558f0bdee3681be1756ec243f8b33",
     "land.geojson": "74e32d31a1f9531a8531d9f5d7bf1b29c4ec94f87a006639e998e01be14f9156"

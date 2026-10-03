@@ -6,14 +6,14 @@
   "inputSha256": "24aca59a2894b0e080ae79f7c790d1137dc95b99ce17c7b963bb046dcfb167ec",
   "reviewedOn": "2026-10-02",
   "representation": "legal-affiliation",
-  "reason": "Approve the official generalized annual post-entry reference only. NRCan attribution/license and 1949 grouping, legal membership/1927 extent, interior ownership checks, ring validation, dissolution and visual review support this limited grade. Independent historical boundary validation, effective control and exact-day geometry remain unverified.",
+  "reason": "Approve the official generalized annual post-entry reference only. NRCan attribution/license and 1949 grouping, legal membership/1927 extent, interior ownership checks, ring validation, dissolution and visual review support this limited grade. Independent historical boundary validation, effective control and exact-day geometry remain unverified. Topology review found and corrected simplification-induced component connections. The revised 0.01-degree output preserves all 1,044 components and is unchanged under canonical self-union normalization.",
   "evidence": ["newfoundland-union-date", "newfoundland-union-legal", "canada-1949-source-scope"],
   "judgmentRecords": [
     "research/jev-historical-slice-records.json",
     "research/jev-labrador-review-records.json"
   ],
-  "transformation": "Fetch official unsimplified divisions, dissolve to national outline, then simplify rings at 0.03 degrees retaining selected boundary points. Preserve small islands and holes.",
+  "transformation": "Fetch official unsimplified divisions, dissolve to national outline, then simplify rings starting at 0.03 degrees, falling back to finer or unsimplified geometry until self-union preserves canonical component, hole and ring boundaries. Record the selected tolerance and retain source boundary points. Preserve small islands and holes.",
   "conflicts": [],
-  "publicationSha256": "21f7cf837af474eb8e3f33a81d425889f8c92a1e70e10f47dde5017ca4738721",
-  "outputSha256": "cfc651f44dabf1d9611968ddbc6f3409b9c41cf7b5bb0ed8efcf8b65e1a0b1cd"
+  "publicationSha256": "4760f63ac8bc0b8dbbffb1fb4e58fd723a044f0a4db101ca97e6a97ec81691f3",
+  "outputSha256": "c0b406d8328d53c0fdebf54a0811c6a3d01ebed9b9d98a50bda9dad9852ec4ac"
 }

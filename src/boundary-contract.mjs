@@ -265,7 +265,12 @@ export function validateManifest(data) {
         event.evidenceIds.every((id) => catalogs.evidence.has(id)),
       'event evidence',
     );
-    requireValue(Number.isInteger(event.date?.year), 'event date');
+    requireValue(
+      Number.isInteger(event.date?.year) &&
+        event.date.year >= data.range[0] &&
+        event.date.year <= data.range[1],
+      'event date range',
+    );
     if (event.precision === 'day')
       requireValue(
         Number.isInteger(event.date.month) &&
@@ -286,6 +291,9 @@ export function validateManifest(data) {
 }
 export function validateStateGeometry(data, states) {
   validateGeometry(data, { territories: true });
+  return selectStateGeometry(data, states);
+}
+export function selectStateGeometry(data, states) {
   return states.map((state) => {
     const feature = data.features.find((f) => f.properties.id === state.featureId);
     requireValue(

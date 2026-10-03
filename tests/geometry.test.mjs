@@ -122,3 +122,14 @@ test('the partial 1949 reference assigns Newfoundland and Labrador to Canada wit
     ['canada'],
   );
 });
+
+test('published Canada1949 preserves its components and boundaries under topology normalization', async () => {
+  const { union } = await import('@turf/union');
+  const { featureCollection } = await import('@turf/helpers');
+  const { topologySignature } = await import('../scripts/canada-1949.mjs');
+  const feature = snapshots.get(1949).features[0];
+  const normalized = union(featureCollection([feature, feature]));
+  assert.equal(feature.geometry.coordinates.length, 1044);
+  assert.equal(topologySignature(feature.geometry), topologySignature(normalized.geometry));
+  assert.equal(snapshots.get(1949).simplificationDegrees, 0.01);
+});

@@ -55,3 +55,19 @@ test('Canada import dissolves shared divisions then simplifies while retaining s
   assert(polygons.flat(2).every((p) => sourcePoints.has(JSON.stringify(p))));
   assert.equal(polygons[0].length, 1); // No seam or artificial water hole at the shared provincial edge.
 });
+
+test('simplification cannot connect separate components from the official input', async () => {
+  const { readFile } = await import('node:fs/promises');
+  const { union } = await import('@turf/union');
+  const { featureCollection } = await import('@turf/helpers');
+  const { simplifyCanadaGeometry, topologySignature } = await import('../scripts/canada-1949.mjs');
+  const source = JSON.parse(
+    await readFile(new URL('./fixtures/canada-1949-topology.geojson', import.meta.url)),
+  );
+  const selected = simplifyCanadaGeometry(source.geometry);
+  assert(selected.tolerance < 0.03);
+  assert.equal(selected.geometry.coordinates.length, 2);
+  const feature = { ...source, geometry: selected.geometry };
+  const normalized = union(featureCollection([feature, feature]));
+  assert.equal(topologySignature(selected.geometry), topologySignature(normalized.geometry));
+});

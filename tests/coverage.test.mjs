@@ -191,3 +191,9 @@ test('available-state navigation uses interval starts without jumping backward o
   assert.equal(adjacentAvailableMoment(fixture, 1949, 1), 1949.25);
   assert.equal(adjacentAvailableMoment(manifest, 1960.5, -1), 1949);
 });
+
+test('event dates must lie within the declared coverage range', () => {
+  const changed = structuredClone(manifest);
+  changed.events[0].date.year = 1600;
+  assert.throws(() => validateManifest(changed), /event date range/);
+});
