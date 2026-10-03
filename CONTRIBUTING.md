@@ -25,8 +25,7 @@ Do not claim a screenshot, command or hosted check passed unless inspected.
 
 Before merge, read `CODING_STANDARDS.md` and run the final review/evidence procedure
 in [release evidence](docs/agents/release.md). Repeat it before reporting completion.
-Inspect the final diff and remote checks. Main requires `verify` and
-`dependencies`, an up-to-date branch, a pull request and resolved conversations.
+Inspect the final diff and remote checks. Main requires `verify`, `dependencies` and `metadata`, an up-to-date branch, a pull request and resolved conversations.
 There is no external-review count requirement for this solo-maintained project.
 Use conventional commit titles (`feat`, `fix`, `chore`, `ci`, `test`, `refactor`,
 `doc`, `perf`, `build`, `style`, `revert`) and squash merge. GitHub deletes merged
