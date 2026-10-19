@@ -146,3 +146,92 @@ test('a delayed snapshot remains unready until its boundaries arrive', async ({ 
     release();
   }
 });
+
+test('malformed geometry is an error, pauses playback and can be retried', async ({ page }) => {
+  await page.route('**/data/snapshot-1938.geojson', (route) =>
+    route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({ type: 'FeatureCollection', features: [] }),
+    }),
+  );
+  await page.getByRole('button', { name: 'View 1938 snapshot', exact: true }).click();
+  await expect(page.locator('.app')).toHaveAttribute('data-coverage', 'error');
+  await expect(page.locator('.app')).toHaveAttribute('data-playing', 'false');
+  await expect(page.getByRole('alert')).toContainText('Invalid boundary data');
+  await expect(page.locator('.territory-legend')).toHaveCount(0);
+  await page.unroute('**/data/snapshot-1938.geojson');
+  await page.getByRole('button', { name: 'Retry' }).click();
+  await expect(page.locator('.app')).toHaveAttribute('data-loaded-year', '1938');
+});
+
+test('seeking away from delayed geometry never restores the obsolete legend', async ({ page }) => {
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  await page.route('**/data/snapshot-1938.geojson', async (route) => {
+    await gate;
+    await route.continue().catch(() => {});
+  });
+  try {
+    await page.getByRole('button', { name: 'View 1938 snapshot', exact: true }).click();
+    await expect(page.locator('.app')).toHaveAttribute('data-loading', 'true');
+    const input = page.getByRole('spinbutton', { name: 'Jump to year' });
+    await input.fill('1776');
+    await input.press('Enter');
+    release();
+    await expect(page.locator('.app')).toHaveAttribute('data-year', '1776');
+    await expect(page.locator('.app')).toHaveAttribute('data-loaded-year', '');
+    await expect(page.locator('.app')).toHaveAttribute('data-coverage', 'gap');
+    await expect(page.locator('.territory-legend')).toHaveCount(0);
+  } finally {
+    release();
+  }
+});
+
+test('unavailable control and dispute representations leave neutral land and explicit gaps', async ({
+  page,
+}) => {
+  await page.getByRole('button', { name: 'Open layer controls' }).click();
+  await page
+    .getByRole('combobox', { name: 'Boundary representation' })
+    .selectOption('effective-control');
+  await expect(page.locator('dialog')).toContainText('No published geometry');
+  await page.getByRole('button', { name: 'Close panel' }).click();
+  await expect(page.locator('.app')).toHaveAttribute('data-coverage', 'gap');
+  await expect(page.locator('.territory-legend')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Open layer controls' }).click();
+  await page.getByRole('combobox', { name: 'Boundary representation' }).selectOption('dispute');
+  await expect(page.locator('dialog')).toContainText('No published geometry');
+  await page
+    .getByRole('combobox', { name: 'Boundary representation' })
+    .selectOption('all-supported');
+  await page.getByRole('button', { name: 'Close panel' }).click();
+  await expect(page.locator('.app')).toHaveAttribute('data-loaded-year', '1880');
+});
+
+test('@smoke Canada1949 exposes legal affiliation, partial coverage and the separately sourced event', async ({
+  page,
+}) => {
+  await page.getByRole('button', { name: 'View 1949 snapshot', exact: true }).click();
+  await expect(page.locator('.app')).toHaveAttribute('data-loaded-year', '1949');
+  await expect(page.locator('.app')).toHaveAttribute('data-coverage', 'partial');
+  await expect(page.locator('.coverage-status')).toContainText('Legal affiliation');
+  await expect(page.locator('.territory-legend')).toContainText('Canada');
+  await expect(page.locator('.territory-legend')).not.toContainText('United States');
+  await expect(page.locator('.territory-legend')).not.toContainText('Mexico');
+  await page.getByRole('button', { name: 'Sources & coverage', exact: true }).click();
+  await expect(page.locator('dialog')).toContainText('31 March 1949');
+  await expect(page.locator('dialog')).toContainText('Exact-day geometry is unavailable');
+  await expect(page.locator('dialog')).toContainText(
+    'US and Mexico geometry for 1949 is unavailable',
+  );
+  await expect(page.locator('dialog')).toContainText('bounded reference-review authorization');
+  await expect(page.locator('dialog')).toContainText('Open Government Licence');
+  await page.getByRole('button', { name: 'Close panel' }).click();
+  const input = page.getByRole('spinbutton', { name: 'Jump to year' });
+  await input.fill('1950');
+  await input.press('Enter');
+  await expect(page.locator('.app')).toHaveAttribute('data-coverage', 'gap');
+  await expect(page.locator('.territory-legend')).toHaveCount(0);
+});

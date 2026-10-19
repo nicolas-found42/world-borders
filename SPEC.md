@@ -2,7 +2,7 @@
 
 This specification defines the historical border globe, the North America pilot, and its expansion into a world timeline. It also defines extensive Jev and TypeSafe use in data preparation, evaluation, and optional visual interaction. It separates the working prototype from requirements for subsequent releases. The audience is the project owner, implementers, data contributors, and reviewers.
 
-Status: implementation specification prepared on 2 October 2026. The project issue tracker is not configured; publication with the `ready-for-agent` label remains pending. This document specifies future work and does not claim that the proposed AI integrations or expanded historical coverage already exist.
+Status: implementation specification prepared on 2 October 2026. GitHub Issues, triage labels, required PR checks, source-refresh review, and GitHub Pages deployment verification are configured (issue #1; merged PRs #2, #7 and #14). The first temporal milestone retains the baseline and adds partial Canada 1949 reference coverage; 1776 geometry and independent boundary review remain incomplete. This document specifies future work and does not claim that the proposed AI integrations or expanded historical coverage already exist.
 
 ## Problem Statement
 
@@ -132,6 +132,24 @@ The product starts in 1776, covers North America before the world, and provides 
 
 Stages express dependencies, not calendar estimates. The current 1880, 1938, 1960, and 2010 states have limited checks, not complete control validation.
 
+### First temporal milestone
+
+The first delivery establishes a versioned boundary-state contract in the static viewer while retaining the four legacy snapshots and their actual review grades. The contract records stable polity and state IDs, geometry source and input hashes, region, representation, temporal precision, evidence links, curator disposition, and limitations. Legacy records remain year-only; migration does not establish effective control or upgrade their review grade.
+
+Validate manifests and every GeoJSON asset at the loader boundary, including source joins, safe local asset paths, finite closed polygon rings, temporal bounds, and publication eligibility. Invalid data produces a recoverable loading error and pauses playback. The viewer clears geometry immediately on a date change and rejects obsolete responses even if a transport ignores cancellation. The dataset revision includes canonical JSON digests for all output geometry assets; the loader verifies them before caching. Versioned caching never joins geometry from a different dataset revision. Errors and loading are distinct from coverage gaps.
+
+Coverage is resolved independently for the requested region and representation. Year-only snapshots match the floored selected year; explicitly evidenced intervals include their start and exclude their end. Missing regions/layers are explicit. Ambiguous overlapping assertions are held as conflicts rather than resolved by list order. Tests use the existing coverage, asset-loader, geometry/ownership, judgment-policy, and browser seams described below, with deterministic fixtures and no paid calls in CI.
+
+The owner selected partial Canada 1949 reference coverage and authorized bounded curator review, an explicit 1776 gap, and delivery. Default political-source viewing includes legacy source-political snapshots and the new legal-affiliation reference. Control, claims and disputes are separately selectable; unavailable geometry stays neutral. Region selection supports North America and Canada/Newfoundland. US/Mexico geometry is absent at 1949; no other year is substituted.
+
+The official NRCan 1949 layer contains fourteen Canadian divisions, including Newfoundland/Labrador, with start/end attributes both 1949. Fetch unsimplified geometry, dissolve the national outline, then apply Douglas–Peucker ring simplification starting at 0.03 degrees, with finer or unsimplified fallback until canonical self-union preserves every component, hole and ring boundary. The selected 1949 tolerance is 0.01 degrees; retain source boundary points and small rings. Simplifying provinces before dissolution left seams and was rejected. Legal membership and the 1927 extent evidence do not independently validate coordinates. The published state remains generalized `official-source` reference geometry.
+
+The union event has day precision at March 31, 1949. The year-only viewer identifies the 1949 map as a post-entry annual reference; it does not assert membership for every day in that year. Exact-day resolution returns a gap. No real interval is published. Source details disclose temporal precision, legal representation, curator disposition, missing regions, attribution/license, transformations and evidence.
+
+Curator disposition is bound to the reviewed raw-input SHA-256 and a publication-scope SHA-256 over the state, evidence, transformation and generated geometry digest, with reviewer authority, representation, evidence IDs, transformation, limitations and conflicts. Changed input requires new review. Unknown licensing, absent approval, ownership conflicts and unsupported time/representation fail publication checks regardless of model scores. Real Jev source judgments and negative/held outcomes are retained for offline replay. This bounded work is not the complete curation service or held-out historical-domain evaluation.
+
+Tickets: #8 (contract/loader); #9 (coverage, blocked by #8); #11 (1949 import, blocked by #9); #12 (curator/replay, contract dependency and publication prerequisite); #13 (release, blocked by #9/#11/#12). The 1776 source blocker is tracked separately. Release requires Standards + Spec review, green required PR checks, main Pages deployment and exact-revision public data/browser verification.
+
 ### Interface and interaction
 
 - Keep a dark full-screen globe stage, prominent year, compact polity legend, small utility controls, and a bottom timeline. Source details and keyboard help use dismissible panels rather than permanent explanatory content.
@@ -148,21 +166,9 @@ Stages express dependencies, not calendar estimates. The current 1880, 1938, 196
 
 ### Domain and temporal contracts
 
-No project glossary or ADR was found. Use the following domain vocabulary consistently:
+The root `GLOSSARY.md` records the shared domain vocabulary. Use the following contracts consistently:
 
-| Term               | Meaning                                                                                                                               |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
-| Polity             | A historically identified political entity; identity is separate from its display name and territory.                                 |
-| Boundary state     | Geometry assigned to a polity, representation, and supported time extent.                                                             |
-| Snapshot           | A source-supported state for a particular calendar year; the existing bundle uses this form.                                          |
-| Validity interval  | An explicitly evidenced start-inclusive, end-exclusive period for a state. It is never inferred from neighboring snapshots.           |
-| Boundary event     | A reviewed change associated with affected polities, evidence, and date precision; signing and administration can be separate events. |
-| Representation     | Effective control, territorial claim, or dispute-related assertion. Unknown remains explicit.                                         |
-| Coverage gap       | No published eligible geometry for the requested region, time, and representation.                                                    |
-| Reference geometry | A licensed generalized shape that has not completed independent historical boundary review.                                           |
-| Evidence item      | A preserved source passage or map reference, with provenance and the specific assertion it supports.                                  |
-| Judgment           | A typed Jev answer with its probabilities, versioned inputs, and downstream policy disposition.                                       |
-| Visual thread      | A curated sequence of published moments selected for visual exploration, not a continuous reconstruction.                             |
+Definitions are maintained in `GLOSSARY.md`; these temporal and publication rules constrain implementation.
 
 Expand the manifest with a new schema version while preserving the existing year-only records. Each boundary state identifies its polity, geometry asset, source references, geographic coverage, representation, supported time extent, precision, review grade, and limitations. Use stable IDs rather than names as joins.
 
@@ -327,14 +333,14 @@ Normal CI uses deterministic recorded answers. Live experiments are explicit, bo
 
 ## Out of Scope
 
-- Implementing the planned integrations or expanding the dataset as part of this specification-writing task.
+- Complete atlas reconstruction, a general live curation service, or semantic/creative viewer features beyond the bounded temporal milestone.
 - Claiming continuous 1776-to-present coverage or completed world coverage from the current four snapshots.
 - Educational essays, generated historian narration, a default history chatbot, or an account/social feed.
 - Generated historical coordinates, interpolation presented as sovereignty evidence, invented disputed polygons, or automatic historical reconciliation based solely on confidence.
 - Mandatory live AI in the render loop, timeline calculations, initial globe loading, or manual exploration.
 - State/provincial and Indigenous boundary reconstruction in the international-border pilot. The architecture reserves independent layers; their future work requires separate evidence and appropriate domain review.
 - Overseas dependencies outside the agreed first pilot, survey-grade geometry, or historic coastlines and river reconstruction.
-- Monetization, payments, user accounts, collaboration systems, public hosting, and automated social publishing.
+- Monetization, payments, user accounts, collaboration systems and automated social publishing. Existing GitHub Pages hosting remains the delivery path.
 - A guarantee that hosted Jev infrastructure or model weights are open source.
 - A complete WebGL-free globe renderer or native mobile app in the first implementation stages.
 
@@ -342,7 +348,7 @@ Normal CI uses deterministic recorded answers. Live experiments are explicit, bo
 
 ### Current baseline and evidence limitations
 
-The prototype's four-year coverage and source grades remain as described above. This spec does not upgrade reference geometry to verified boundaries.
+The four prototype snapshots retain their original grades. The temporal milestone adds partial Canada 1949 at official-source reference grade and a separately evidenced union event. None is promoted to independently verified boundaries.
 
 The earlier build had eight passing unit/data tests and a passing browser scenario. Those results describe the prototype before this specification; they do not validate features proposed here. No code tests were rerun merely to write this document. New integrations require the acceptance work above.
 
@@ -364,6 +370,6 @@ TypeSafe's [Jev 1.13 limitations](https://docs.typesafe.ai/model-jaggedness/jev-
 
 ### Publication
 
-This repository has no configured Git remote or project issue-tracker/triage configuration. Run `/setup-matt-pocock-skills` to establish the intended tracker. Once available, publish this specification as the project issue body and apply `ready-for-agent`. Do not create an unrelated repository, choose an arbitrary tracker, or claim publication occurred.
+The configured tracker is GitHub Issues for `nicolas-found42/world-borders`; issue and triage guidance lives in `docs/agents/`. Delivery infrastructure is complete in issue #1 and merged PRs #2, #7 and #14. Publish milestone tickets with `ready-for-agent`, link actual dependencies, and verify PR checks, merge, issue closure, and the deployed commit. Reuse the existing source-review and Pages pipeline.
 
 Source availability, control/dispute reconstruction, semantic calibration, model licensing, creative-tool order, and device performance remain explicit release concerns. They do not authorize guessed data.

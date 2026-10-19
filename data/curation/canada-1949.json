@@ -1,0 +1,19 @@
+{
+  "id": "canada-1949",
+  "status": "approved-reference",
+  "reviewer": "Codex, under Nicolas's bounded reference-review authorization",
+  "authority": "Owner selected partial Canada 1949 reference coverage and authorized bounded reference approval, an explicit 1776 gap, and delivery in this implementation session on 2026-10-02.",
+  "inputSha256": "24aca59a2894b0e080ae79f7c790d1137dc95b99ce17c7b963bb046dcfb167ec",
+  "reviewedOn": "2026-10-02",
+  "representation": "legal-affiliation",
+  "reason": "Approve the official generalized annual post-entry reference only. NRCan attribution/license and 1949 grouping, legal membership/1927 extent, interior ownership checks, ring validation, dissolution and visual review support this limited grade. Independent historical boundary validation, effective control and exact-day geometry remain unverified. Topology review found and corrected simplification-induced component connections. The revised 0.01-degree output preserves all 1,044 components and is unchanged under canonical self-union normalization.",
+  "evidence": ["newfoundland-union-date", "newfoundland-union-legal", "canada-1949-source-scope"],
+  "judgmentRecords": [
+    "research/jev-historical-slice-records.json",
+    "research/jev-labrador-review-records.json"
+  ],
+  "transformation": "Fetch official unsimplified divisions, dissolve to national outline, then simplify rings starting at 0.03 degrees, falling back to finer or unsimplified geometry until self-union preserves canonical component, hole and ring boundaries. Record the selected tolerance and retain source boundary points. Preserve small islands and holes.",
+  "conflicts": [],
+  "publicationSha256": "cfb4a820de2a1f597f35746de3d2d34604ce0947412a64f9ea3d4dbfe63a8fac",
+  "outputSha256": "c0b406d8328d53c0fdebf54a0811c6a3d01ebed9b9d98a50bda9dad9852ec4ac"
+}

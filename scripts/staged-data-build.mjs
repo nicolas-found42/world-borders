@@ -1,16 +1,7 @@
-import {
-  cp,
-  mkdir,
-  mkdtemp,
-  rename,
-  rm,
-  readFile,
-  writeFile,
-  lstat,
-  realpath,
-  open,
-} from 'node:fs/promises';
+import { cp, mkdir, rename, rm, readFile, writeFile, lstat, realpath } from 'node:fs/promises';
 import { basename, dirname, join, resolve, sep } from 'node:path';
+import { randomUUID } from 'node:crypto';
+import lockfile from 'proper-lockfile';
 
 async function exists(path) {
   try {
@@ -54,57 +45,103 @@ async function recover(marker, journal) {
   }
   await rm(`${marker}.next`, { force: true });
   await rm(marker);
+  if (journal.pointer && (await exists(journal.pointer))) {
+    const pointer = JSON.parse(await readFile(journal.pointer, 'utf8'));
+    if (pointer.marker !== marker) throw new Error('Transaction pointer changed during recovery');
+    await rm(journal.pointer);
+  }
 }
 
-// A persistent journal also restores an interrupted process before the next build.
-export async function stagedDataBuild(cache, output, build) {
+// A separate lease serializes recovery and installation. All callers use identical timings.
+// A killed owner can be recovered after 120 seconds without relying on a reused PID.
+export async function stagedDataBuild(cache, output, build, { checkpoint = async () => {} } = {}) {
   const targets = [await canonicalDirectory(cache), await canonicalDirectory(output)];
   if (targets[0] === targets[1] || targets.some((p, i) => targets[1 - i].startsWith(p + sep)))
     throw new Error('Cache and output directories must be separate, non-nested paths');
   const marker = join(dirname(targets[0]), `.${basename(targets[0])}.transaction.json`);
-  if (await exists(marker)) {
-    const previous = JSON.parse(await readFile(marker, 'utf8'));
-    let alive = true;
-    try {
-      process.kill(previous.pid, 0);
-    } catch (error) {
-      if (error.code === 'ESRCH') alive = false;
-      else throw error;
-    }
-    if (alive) throw new Error(`Data build already running as PID ${previous.pid}`);
-    await recover(marker, previous);
-  }
-  const lock = await open(marker, 'wx');
-  const journal = { pid: process.pid, phase: 'building', entries: [] };
-  await lock.writeFile(JSON.stringify(journal));
-  await lock.close();
+  const pointer = join(dirname(targets[1]), `.${basename(targets[1])}.transaction-pointer.json`);
+  const releases = [];
   try {
-    for (const target of targets) {
-      const stage = await mkdtemp(join(dirname(target), `.${basename(target)}.pending-`));
-      const entry = {
-        target,
-        stage,
-        backup: `${stage}.previous`,
-        hadOriginal: await exists(target),
-      };
-      journal.entries.push(entry);
+    // Lock both destinations in a stable order, including when different caches share output.
+    for (const target of [...targets].sort()) {
+      releases.push(
+        await lockfile.lock(target, {
+          realpath: false,
+          lockfilePath: join(dirname(target), `.${basename(target)}.build-lock`),
+          stale: 120000,
+          update: 5000,
+          retries: 0,
+        }),
+      );
+    }
+    await checkpoint('locked');
+    if (await exists(pointer)) {
+      const pending = JSON.parse(await readFile(pointer, 'utf8'));
+      if (pending.marker !== marker)
+        throw new Error(`Recover the original destination pair first: ${pending.marker}`);
+    }
+    if (await exists(marker)) {
+      const text = await readFile(marker, 'utf8');
+      // Legacy empty markers were created before any staging or active-directory mutation.
+      if (!text.trim()) {
+        await rm(marker);
+        await rm(`${marker}.next`, { force: true });
+      } else {
+        const previous = JSON.parse(text);
+        const saved = await Promise.all(
+          (previous.targets || previous.entries.map((entry) => entry.target)).map(
+            canonicalDirectory,
+          ),
+        );
+        if (
+          (previous.targets && JSON.stringify(saved) !== JSON.stringify(targets)) ||
+          saved.some((target) => !targets.includes(target))
+        )
+          throw new Error('Recover the original destination pair before changing output');
+        await recover(marker, previous);
+      }
+    }
+    await checkpoint('recovered');
+    const journal = { phase: 'building', entries: [], targets, pointer };
+
+    await saveJournal(marker, journal);
+    await saveJournal(pointer, { marker });
+    await checkpoint('initialized');
+    try {
+      for (const [index, target] of targets.entries()) {
+        const stage = join(dirname(target), `.${basename(target)}.pending-${randomUUID()}`);
+        const entry = {
+          target,
+          stage,
+          backup: `${stage}.previous`,
+          hadOriginal: await exists(target),
+        };
+        journal.entries.push(entry);
+        await saveJournal(marker, journal);
+        await checkpoint(`planned-${index}`);
+        await mkdir(stage);
+        await checkpoint(`staged-${index}`);
+        if (entry.hadOriginal) await cp(target, stage, { recursive: true });
+      }
+      await build(journal.entries[0].stage, journal.entries[1].stage);
+      journal.phase = 'installing';
       await saveJournal(marker, journal);
-      if (entry.hadOriginal) await cp(target, stage, { recursive: true });
+      await checkpoint('installing');
+      for (const [index, entry] of journal.entries.entries()) {
+        if (entry.hadOriginal) await rename(entry.target, entry.backup);
+        await checkpoint(`backed-up-${index}`);
+        await rename(entry.stage, entry.target);
+        await checkpoint(`installed-${index}`);
+      }
+      journal.phase = 'committed';
+      await saveJournal(marker, journal);
+      await checkpoint('committed');
+    } catch (error) {
+      await recover(marker, JSON.parse(await readFile(marker, 'utf8')));
+      throw error;
     }
-    await build(journal.entries[0].stage, journal.entries[1].stage);
-    // All paths and prior-existence facts are persisted before the first active rename.
-    journal.phase = 'installing';
-    await saveJournal(marker, journal);
-    for (const entry of journal.entries) {
-      if (entry.hadOriginal) await rename(entry.target, entry.backup);
-      await rename(entry.stage, entry.target);
-    }
-    journal.phase = 'committed';
-    await saveJournal(marker, journal);
-  } catch (error) {
-    // Recover according to the persisted phase, including a failed commit-marker write.
-    await recover(marker, JSON.parse(await readFile(marker, 'utf8')));
-    throw error;
+    await recover(marker, journal);
+  } finally {
+    for (const release of releases.toReversed()) await release();
   }
-  await recover(marker, journal);
 }

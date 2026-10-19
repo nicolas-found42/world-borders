@@ -15,7 +15,7 @@ npm ci
 npm run dev
 ```
 
-The four snapshot files are included, so the app needs no historical data service,
+The five snapshot files are included, so the app needs no historical data service,
 API key, account, or AI call at runtime. Fonts are served locally.
 
 ## Project specification
@@ -38,12 +38,11 @@ used to develop the specification, including failures and unresolved judgments.
 
 ## Historical coverage
 
-The timeline runs from 1776 to 2026, but the pilot contains only **1880, 1938,
-1960, and 2010** snapshots. Unsupported years intentionally show
+The timeline runs from 1776 to 2026, but the pilot contains **1880, 1938, 1949 (partial Canada), 1960, and 2010** snapshots. Unsupported years intentionally show
 neutral physical land with no historical territory polygons. This is a working
 renderer and data-pipeline milestone, not a completed historical atlas.
 
-Only the **1880 Canada and Newfoundland** polygons come from the official Natural
+The **1880 Canada/Newfoundland and partial Canada 1949** polygons come from the official Natural
 Resources Canada historical GIS service. Provincial geometries are dissolved so
 internal boundaries are not drawn. Other regions use generalized Historical
 Basemaps reference geometry and have not undergone complete independent boundary
@@ -54,6 +53,19 @@ complete nearby-island coverage remain future work.
 Ownership checks independently confirm Hawaii is outside the US in 1880 and
 inside it in 1938, and Newfoundland is outside Canada in 1880/1938 and inside it
 in 1960/2010. The checks do not establish survey-grade coordinate accuracy.
+
+The 1949 reference depicts Canada after Newfoundland’s March 31 entry. The event
+has day precision; annual geometry cannot answer an exact-day request. US and
+Mexico are absent at 1949. Region and representation controls offer Canada coverage,
+legal affiliation, control, claims and disputes; unavailable states show neutral
+land. No continuous interval is inferred. The timeline starts in 1776 with an
+explicit gap because verified starting geometry is unavailable.
+
+The versioned loader validates manifests and GeoJSON, preserves review grades,
+suppresses obsolete loads, and offers retry. A [curator disposition](data/curation/canada-1949.json)
+binds reference approval to the reviewed input hash and scope.
+[Historical research](research/HISTORICAL_SLICE_RESEARCH.md) and real replayable
+Jev ledgers support source review; complete curation/semantic systems remain planned.
 
 The 1783, 1800 and 1815 candidates were excluded because their polygons place
 Jacksonville, Florida within the US before the 1821 transfer. The 1815 and 1900

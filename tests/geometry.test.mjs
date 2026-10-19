@@ -110,3 +110,26 @@ test('Data has explicit provenance, closed finite rings, and no NC-required sour
     }
   }
 });
+
+test('the partial 1949 reference assigns Newfoundland and Labrador to Canada without US or Mexico carryover', () => {
+  assert(contains(1949, 'canada', [-56, 48.8]));
+  assert(contains(1949, 'canada', [-60.41, 53.3]));
+  assert(contains(1949, 'canada', [-75.69, 45.42]));
+  assert(!contains(1949, 'canada', [-74, 40.71]));
+  assert(!contains(1949, 'canada', [-99.13, 19.43]));
+  assert.deepEqual(
+    snapshots.get(1949).features.map((f) => f.properties.id),
+    ['canada'],
+  );
+});
+
+test('published Canada1949 preserves its components and boundaries under topology normalization', async () => {
+  const { union } = await import('@turf/union');
+  const { featureCollection } = await import('@turf/helpers');
+  const { topologySignature } = await import('../scripts/canada-1949.mjs');
+  const feature = snapshots.get(1949).features[0];
+  const normalized = union(featureCollection([feature, feature]));
+  assert.equal(feature.geometry.coordinates.length, 1044);
+  assert.equal(topologySignature(feature.geometry), topologySignature(normalized.geometry));
+  assert.equal(snapshots.get(1949).simplificationDegrees, 0.01);
+});

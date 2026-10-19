@@ -13,7 +13,7 @@ test('Unsupported years never inherit an earlier territorial state', () => {
 });
 test('Snapshot stepping respects sparse coverage and range edges', () => {
   assert.equal(adjacentSnapshot(manifest.snapshots, 1880.5, 1), 1938);
-  assert.equal(adjacentSnapshot(manifest.snapshots, 1960, -1), 1938);
+  assert.equal(adjacentSnapshot(manifest.snapshots, 1960, -1), 1949);
   assert.equal(adjacentSnapshot(manifest.snapshots, 1776, -1), null);
   assert.equal(adjacentSnapshot(manifest.snapshots, 2026, 1), null);
 });

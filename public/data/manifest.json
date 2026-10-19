@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "range": [
     1776,
     2026
@@ -29,6 +29,18 @@
         {
           "url": "https://raw.githubusercontent.com/aourednik/historical-basemaps/master/geojson/world_1938.geojson",
           "sha256": "f2565926fed1b197227b7fe126934a43ed75b8fce007e38be72a7d21a415d813"
+        }
+      ],
+      "coverage": "snapshot-year-only"
+    },
+    {
+      "year": 1949,
+      "file": "snapshot-1949.geojson",
+      "corrections": [],
+      "inputs": [
+        {
+          "url": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/territorial_evolution_en/MapServer/8/query?where=START_TIME%3D1949&outFields=PROV_NAME,START_TIME,END_TIME,Period_Group&outSR=4326&maxAllowableOffset=0&f=geojson",
+          "sha256": "24aca59a2894b0e080ae79f7c790d1137dc95b99ce17c7b963bb046dcfb167ec"
         }
       ],
       "coverage": "snapshot-year-only"
@@ -73,7 +85,7 @@
       "author": "Natural Resources Canada",
       "license": "Open Government Licence – Canada",
       "url": "https://open.canada.ca/data/dataset/e88ce995-b69a-4595-a752-bb06b061b5a3",
-      "note": "1880 Canadian and Newfoundland polygons from the official service. Provincial divisions dissolved; service simplifies geometry at 0.03 degrees."
+      "note": "1880 historical Canadian geometry uses service simplification at 0.03 degrees. For 1949, unsimplified official divisions are dissolved, then simplified with Douglas–Peucker starting at 0.03 degrees with finer or unsimplified fallback until topology normalization preserves every component, hole and ring boundary. Selected tolerance is recorded on the asset; source boundary points are retained. Contains information licensed under the Open Government Licence – Canada (https://open.canada.ca/en/open-government-licence-canada). Government of Canada does not endorse this application."
     },
     {
       "id": "natural-earth",
@@ -98,6 +110,14 @@
       "license": "Linked reference only",
       "url": "https://parks.canada.ca/culture/designation/evenement-event/terre-neuve-confederation-newfoundland",
       "note": "Independent check that Newfoundland is separate from Canada in 1880 and 1938, and part of Canada in 1960 and 2010."
+    },
+    {
+      "id": "newfoundland-union-act",
+      "name": "British North America Act 1949, Terms of Union",
+      "author": "UK Parliament",
+      "license": "Linked reference only",
+      "url": "https://www.legislation.gov.uk/ukpga/Geo6/12-13-14/22/enacted",
+      "note": "Terms 1–2 establish legal affiliation and territorial definition; statute is evidence, not polygon coordinates."
     }
   ],
   "landInput": {
@@ -124,10 +144,734 @@
     }
   ],
   "limitations": [
-    "Four snapshot years, not continuous historical coverage. Other years deliberately have no territorial polygons.",
-    "Only the 1880 Canada/Newfoundland geometry is drawn from a government historical polygon service. Other historical shapes are generalized source references, not fully vetted boundaries.",
+    "Five annual reference snapshots, including partial Canada 1949. No continuous coverage or verified 1776 geometry; other years show neutral land.",
+    "1880 Canada/Newfoundland and partial Canada 1949 use official historical service geometry. Historical boundaries remain generalized reference data pending independent boundary validation.",
     "Early colonial claims are not effective control. Indigenous territories are not yet mapped; neutral areas do not imply uninhabited or unclaimed land.",
     "A complete disputed-boundary layer is not yet available. No disputed areas are invented.",
     "Nearby island and predecessor coverage is incomplete. Overseas dependencies are outside this pilot."
-  ]
+  ],
+  "polities": [
+    {
+      "id": "canada",
+      "name": "Canada"
+    },
+    {
+      "id": "mexico",
+      "name": "Mexico"
+    },
+    {
+      "id": "hawaii",
+      "name": "Hawaiian Kingdom"
+    },
+    {
+      "id": "usa",
+      "name": "United States"
+    },
+    {
+      "id": "newfoundland",
+      "name": "Newfoundland"
+    }
+  ],
+  "states": [
+    {
+      "id": "canada-1880",
+      "polityId": "canada",
+      "featureId": "canada",
+      "file": "snapshot-1880.geojson",
+      "sourceIds": [
+        "nrcan"
+      ],
+      "inputs": [
+        {
+          "url": "https://raw.githubusercontent.com/aourednik/historical-basemaps/master/geojson/world_1880.geojson",
+          "sha256": "4751e30d881d60d31479f5d016ff4d9c1df47e9bb18efaa3a5086601f68f76dc"
+        },
+        {
+          "url": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/territorial_evolution_en/MapServer/8/query?where=START_TIME%3D1880&outFields=PROV_NAME,START_TIME,Period_Group&outSR=4326&maxAllowableOffset=0.03&f=geojson",
+          "sha256": "5f4b5805166eaa8198c325ff8301881a891f40fe66b88b79a889b0bf4a8cdd5c"
+        }
+      ],
+      "regions": [
+        "north-america",
+        "canada-newfoundland"
+      ],
+      "coverage": "partial",
+      "representation": "source-political",
+      "time": {
+        "kind": "snapshot",
+        "year": 1880,
+        "precision": "year"
+      },
+      "precision": "generalized",
+      "review": "official-source",
+      "evidenceIds": [],
+      "limitations": [
+        "Generalized source snapshot; independent historical boundary validation and local dispute coverage are incomplete."
+      ],
+      "disposition": {
+        "status": "legacy-published",
+        "reviewer": "Existing published bundle",
+        "reason": "Preserve the baseline review grade without promoting historical accuracy.",
+        "conflicts": []
+      }
+    },
+    {
+      "id": "mexico-1880",
+      "polityId": "mexico",
+      "featureId": "mexico",
+      "file": "snapshot-1880.geojson",
+      "sourceIds": [
+        "historical-basemaps"
+      ],
+      "inputs": [
+        {
+          "url": "https://raw.githubusercontent.com/aourednik/historical-basemaps/master/geojson/world_1880.geojson",
+          "sha256": "4751e30d881d60d31479f5d016ff4d9c1df47e9bb18efaa3a5086601f68f76dc"
+        },
+        {
+          "url": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/territorial_evolution_en/MapServer/8/query?where=START_TIME%3D1880&outFields=PROV_NAME,START_TIME,Period_Group&outSR=4326&maxAllowableOffset=0.03&f=geojson",
+          "sha256": "5f4b5805166eaa8198c325ff8301881a891f40fe66b88b79a889b0bf4a8cdd5c"
+        }
+      ],
+      "regions": [
+        "north-america",
+        "mexico"
+      ],
+      "coverage": "partial",
+      "representation": "source-political",
+      "time": {
+        "kind": "snapshot",
+        "year": 1880,
+        "precision": "year"
+      },
+      "precision": "generalized",
+      "review": "source-snapshot",
+      "evidenceIds": [],
+      "limitations": [
+        "Generalized source snapshot; independent historical boundary validation and local dispute coverage are incomplete."
+      ],
+      "disposition": {
+        "status": "legacy-published",
+        "reviewer": "Existing published bundle",
+        "reason": "Preserve the baseline review grade without promoting historical accuracy.",
+        "conflicts": []
+      }
+    },
+    {
+      "id": "hawaii-1880",
+      "polityId": "hawaii",
+      "featureId": "hawaii",
+      "file": "snapshot-1880.geojson",
+      "sourceIds": [
+        "historical-basemaps"
+      ],
+      "inputs": [
+        {
+          "url": "https://raw.githubusercontent.com/aourednik/historical-basemaps/master/geojson/world_1880.geojson",
+          "sha256": "4751e30d881d60d31479f5d016ff4d9c1df47e9bb18efaa3a5086601f68f76dc"
+        },
+        {
+          "url": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/territorial_evolution_en/MapServer/8/query?where=START_TIME%3D1880&outFields=PROV_NAME,START_TIME,Period_Group&outSR=4326&maxAllowableOffset=0.03&f=geojson",
+          "sha256": "5f4b5805166eaa8198c325ff8301881a891f40fe66b88b79a889b0bf4a8cdd5c"
+        }
+      ],
+      "regions": [
+        "north-america",
+        "hawaii"
+      ],
+      "coverage": "partial",
+      "representation": "source-political",
+      "time": {
+        "kind": "snapshot",
+        "year": 1880,
+        "precision": "year"
+      },
+      "precision": "generalized",
+      "review": "source-snapshot",
+      "evidenceIds": [],
+      "limitations": [
+        "Generalized source snapshot; independent historical boundary validation and local dispute coverage are incomplete."
+      ],
+      "disposition": {
+        "status": "legacy-published",
+        "reviewer": "Existing published bundle",
+        "reason": "Preserve the baseline review grade without promoting historical accuracy.",
+        "conflicts": []
+      }
+    },
+    {
+      "id": "usa-1880",
+      "polityId": "usa",
+      "featureId": "usa",
+      "file": "snapshot-1880.geojson",
+      "sourceIds": [
+        "historical-basemaps"
+      ],
+      "inputs": [
+        {
+          "url": "https://raw.githubusercontent.com/aourednik/historical-basemaps/master/geojson/world_1880.geojson",
+          "sha256": "4751e30d881d60d31479f5d016ff4d9c1df47e9bb18efaa3a5086601f68f76dc"
+        },
+        {
+          "url": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/territorial_evolution_en/MapServer/8/query?where=START_TIME%3D1880&outFields=PROV_NAME,START_TIME,Period_Group&outSR=4326&maxAllowableOffset=0.03&f=geojson",
+          "sha256": "5f4b5805166eaa8198c325ff8301881a891f40fe66b88b79a889b0bf4a8cdd5c"
+        }
+      ],
+      "regions": [
+        "north-america",
+        "usa"
+      ],
+      "coverage": "partial",
+      "representation": "source-political",
+      "time": {
+        "kind": "snapshot",
+        "year": 1880,
+        "precision": "year"
+      },
+      "precision": "generalized",
+      "review": "source-snapshot",
+      "evidenceIds": [],
+      "limitations": [
+        "Generalized source snapshot; independent historical boundary validation and local dispute coverage are incomplete."
+      ],
+      "disposition": {
+        "status": "legacy-published",
+        "reviewer": "Existing published bundle",
+        "reason": "Preserve the baseline review grade without promoting historical accuracy.",
+        "conflicts": []
+      }
+    },
+    {
+      "id": "newfoundland-1880",
+      "polityId": "newfoundland",
+      "featureId": "newfoundland",
+      "file": "snapshot-1880.geojson",
+      "sourceIds": [
+        "nrcan"
+      ],
+      "inputs": [
+        {
+          "url": "https://raw.githubusercontent.com/aourednik/historical-basemaps/master/geojson/world_1880.geojson",
+          "sha256": "4751e30d881d60d31479f5d016ff4d9c1df47e9bb18efaa3a5086601f68f76dc"
+        },
+        {
+          "url": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/territorial_evolution_en/MapServer/8/query?where=START_TIME%3D1880&outFields=PROV_NAME,START_TIME,Period_Group&outSR=4326&maxAllowableOffset=0.03&f=geojson",
+          "sha256": "5f4b5805166eaa8198c325ff8301881a891f40fe66b88b79a889b0bf4a8cdd5c"
+        }
+      ],
+      "regions": [
+        "north-america",
+        "canada-newfoundland"
+      ],
+      "coverage": "partial",
+      "representation": "source-political",
+      "time": {
+        "kind": "snapshot",
+        "year": 1880,
+        "precision": "year"
+      },
+      "precision": "generalized",
+      "review": "official-source",
+      "evidenceIds": [],
+      "limitations": [
+        "Generalized source snapshot; independent historical boundary validation and local dispute coverage are incomplete."
+      ],
+      "disposition": {
+        "status": "legacy-published",
+        "reviewer": "Existing published bundle",
+        "reason": "Preserve the baseline review grade without promoting historical accuracy.",
+        "conflicts": []
+      }
+    },
+    {
+      "id": "mexico-1938",
+      "polityId": "mexico",
+      "featureId": "mexico",
+      "file": "snapshot-1938.geojson",
+      "sourceIds": [
+        "historical-basemaps"
+      ],
+      "inputs": [
+        {
+          "url": "https://raw.githubusercontent.com/aourednik/historical-basemaps/master/geojson/world_1938.geojson",
+          "sha256": "f2565926fed1b197227b7fe126934a43ed75b8fce007e38be72a7d21a415d813"
+        }
+      ],
+      "regions": [
+        "north-america",
+        "mexico"
+      ],
+      "coverage": "partial",
+      "representation": "source-political",
+      "time": {
+        "kind": "snapshot",
+        "year": 1938,
+        "precision": "year"
+      },
+      "precision": "generalized",
+      "review": "source-snapshot",
+      "evidenceIds": [],
+      "limitations": [
+        "Generalized source snapshot; independent historical boundary validation and local dispute coverage are incomplete."
+      ],
+      "disposition": {
+        "status": "legacy-published",
+        "reviewer": "Existing published bundle",
+        "reason": "Preserve the baseline review grade without promoting historical accuracy.",
+        "conflicts": []
+      }
+    },
+    {
+      "id": "newfoundland-1938",
+      "polityId": "newfoundland",
+      "featureId": "newfoundland",
+      "file": "snapshot-1938.geojson",
+      "sourceIds": [
+        "historical-basemaps"
+      ],
+      "inputs": [
+        {
+          "url": "https://raw.githubusercontent.com/aourednik/historical-basemaps/master/geojson/world_1938.geojson",
+          "sha256": "f2565926fed1b197227b7fe126934a43ed75b8fce007e38be72a7d21a415d813"
+        }
+      ],
+      "regions": [
+        "north-america",
+        "canada-newfoundland"
+      ],
+      "coverage": "partial",
+      "representation": "source-political",
+      "time": {
+        "kind": "snapshot",
+        "year": 1938,
+        "precision": "year"
+      },
+      "precision": "generalized",
+      "review": "source-snapshot",
+      "evidenceIds": [],
+      "limitations": [
+        "Generalized source snapshot; independent historical boundary validation and local dispute coverage are incomplete."
+      ],
+      "disposition": {
+        "status": "legacy-published",
+        "reviewer": "Existing published bundle",
+        "reason": "Preserve the baseline review grade without promoting historical accuracy.",
+        "conflicts": []
+      }
+    },
+    {
+      "id": "canada-1938",
+      "polityId": "canada",
+      "featureId": "canada",
+      "file": "snapshot-1938.geojson",
+      "sourceIds": [
+        "historical-basemaps"
+      ],
+      "inputs": [
+        {
+          "url": "https://raw.githubusercontent.com/aourednik/historical-basemaps/master/geojson/world_1938.geojson",
+          "sha256": "f2565926fed1b197227b7fe126934a43ed75b8fce007e38be72a7d21a415d813"
+        }
+      ],
+      "regions": [
+        "north-america",
+        "canada-newfoundland"
+      ],
+      "coverage": "partial",
+      "representation": "source-political",
+      "time": {
+        "kind": "snapshot",
+        "year": 1938,
+        "precision": "year"
+      },
+      "precision": "generalized",
+      "review": "source-snapshot",
+      "evidenceIds": [],
+      "limitations": [
+        "Generalized source snapshot; independent historical boundary validation and local dispute coverage are incomplete."
+      ],
+      "disposition": {
+        "status": "legacy-published",
+        "reviewer": "Existing published bundle",
+        "reason": "Preserve the baseline review grade without promoting historical accuracy.",
+        "conflicts": []
+      }
+    },
+    {
+      "id": "usa-1938",
+      "polityId": "usa",
+      "featureId": "usa",
+      "file": "snapshot-1938.geojson",
+      "sourceIds": [
+        "historical-basemaps"
+      ],
+      "inputs": [
+        {
+          "url": "https://raw.githubusercontent.com/aourednik/historical-basemaps/master/geojson/world_1938.geojson",
+          "sha256": "f2565926fed1b197227b7fe126934a43ed75b8fce007e38be72a7d21a415d813"
+        }
+      ],
+      "regions": [
+        "north-america",
+        "usa"
+      ],
+      "coverage": "partial",
+      "representation": "source-political",
+      "time": {
+        "kind": "snapshot",
+        "year": 1938,
+        "precision": "year"
+      },
+      "precision": "generalized",
+      "review": "source-snapshot",
+      "evidenceIds": [],
+      "limitations": [
+        "Generalized source snapshot; independent historical boundary validation and local dispute coverage are incomplete."
+      ],
+      "disposition": {
+        "status": "legacy-published",
+        "reviewer": "Existing published bundle",
+        "reason": "Preserve the baseline review grade without promoting historical accuracy.",
+        "conflicts": []
+      }
+    },
+    {
+      "id": "usa-1960",
+      "polityId": "usa",
+      "featureId": "usa",
+      "file": "snapshot-1960.geojson",
+      "sourceIds": [
+        "historical-basemaps"
+      ],
+      "inputs": [
+        {
+          "url": "https://raw.githubusercontent.com/aourednik/historical-basemaps/master/geojson/world_1960.geojson",
+          "sha256": "6067386755f8fc120a4fca44f198952a18da89cd062aa8013d5a0d08cbad8988"
+        }
+      ],
+      "regions": [
+        "north-america",
+        "usa"
+      ],
+      "coverage": "partial",
+      "representation": "source-political",
+      "time": {
+        "kind": "snapshot",
+        "year": 1960,
+        "precision": "year"
+      },
+      "precision": "generalized",
+      "review": "source-snapshot",
+      "evidenceIds": [],
+      "limitations": [
+        "Generalized source snapshot; independent historical boundary validation and local dispute coverage are incomplete."
+      ],
+      "disposition": {
+        "status": "legacy-published",
+        "reviewer": "Existing published bundle",
+        "reason": "Preserve the baseline review grade without promoting historical accuracy.",
+        "conflicts": []
+      }
+    },
+    {
+      "id": "mexico-1960",
+      "polityId": "mexico",
+      "featureId": "mexico",
+      "file": "snapshot-1960.geojson",
+      "sourceIds": [
+        "historical-basemaps"
+      ],
+      "inputs": [
+        {
+          "url": "https://raw.githubusercontent.com/aourednik/historical-basemaps/master/geojson/world_1960.geojson",
+          "sha256": "6067386755f8fc120a4fca44f198952a18da89cd062aa8013d5a0d08cbad8988"
+        }
+      ],
+      "regions": [
+        "north-america",
+        "mexico"
+      ],
+      "coverage": "partial",
+      "representation": "source-political",
+      "time": {
+        "kind": "snapshot",
+        "year": 1960,
+        "precision": "year"
+      },
+      "precision": "generalized",
+      "review": "source-snapshot",
+      "evidenceIds": [],
+      "limitations": [
+        "Generalized source snapshot; independent historical boundary validation and local dispute coverage are incomplete."
+      ],
+      "disposition": {
+        "status": "legacy-published",
+        "reviewer": "Existing published bundle",
+        "reason": "Preserve the baseline review grade without promoting historical accuracy.",
+        "conflicts": []
+      }
+    },
+    {
+      "id": "canada-1960",
+      "polityId": "canada",
+      "featureId": "canada",
+      "file": "snapshot-1960.geojson",
+      "sourceIds": [
+        "historical-basemaps"
+      ],
+      "inputs": [
+        {
+          "url": "https://raw.githubusercontent.com/aourednik/historical-basemaps/master/geojson/world_1960.geojson",
+          "sha256": "6067386755f8fc120a4fca44f198952a18da89cd062aa8013d5a0d08cbad8988"
+        }
+      ],
+      "regions": [
+        "north-america",
+        "canada-newfoundland"
+      ],
+      "coverage": "partial",
+      "representation": "source-political",
+      "time": {
+        "kind": "snapshot",
+        "year": 1960,
+        "precision": "year"
+      },
+      "precision": "generalized",
+      "review": "source-snapshot",
+      "evidenceIds": [],
+      "limitations": [
+        "Generalized source snapshot; independent historical boundary validation and local dispute coverage are incomplete."
+      ],
+      "disposition": {
+        "status": "legacy-published",
+        "reviewer": "Existing published bundle",
+        "reason": "Preserve the baseline review grade without promoting historical accuracy.",
+        "conflicts": []
+      }
+    },
+    {
+      "id": "usa-2010",
+      "polityId": "usa",
+      "featureId": "usa",
+      "file": "snapshot-2010.geojson",
+      "sourceIds": [
+        "historical-basemaps"
+      ],
+      "inputs": [
+        {
+          "url": "https://raw.githubusercontent.com/aourednik/historical-basemaps/master/geojson/world_2010.geojson",
+          "sha256": "d18dcbe41df5e68ec174e5f3887578142bf70fba72f56e204c9de5a8571ae0f4"
+        }
+      ],
+      "regions": [
+        "north-america",
+        "usa"
+      ],
+      "coverage": "partial",
+      "representation": "source-political",
+      "time": {
+        "kind": "snapshot",
+        "year": 2010,
+        "precision": "year"
+      },
+      "precision": "generalized",
+      "review": "source-snapshot",
+      "evidenceIds": [],
+      "limitations": [
+        "Generalized source snapshot; independent historical boundary validation and local dispute coverage are incomplete."
+      ],
+      "disposition": {
+        "status": "legacy-published",
+        "reviewer": "Existing published bundle",
+        "reason": "Preserve the baseline review grade without promoting historical accuracy.",
+        "conflicts": []
+      }
+    },
+    {
+      "id": "mexico-2010",
+      "polityId": "mexico",
+      "featureId": "mexico",
+      "file": "snapshot-2010.geojson",
+      "sourceIds": [
+        "historical-basemaps"
+      ],
+      "inputs": [
+        {
+          "url": "https://raw.githubusercontent.com/aourednik/historical-basemaps/master/geojson/world_2010.geojson",
+          "sha256": "d18dcbe41df5e68ec174e5f3887578142bf70fba72f56e204c9de5a8571ae0f4"
+        }
+      ],
+      "regions": [
+        "north-america",
+        "mexico"
+      ],
+      "coverage": "partial",
+      "representation": "source-political",
+      "time": {
+        "kind": "snapshot",
+        "year": 2010,
+        "precision": "year"
+      },
+      "precision": "generalized",
+      "review": "source-snapshot",
+      "evidenceIds": [],
+      "limitations": [
+        "Generalized source snapshot; independent historical boundary validation and local dispute coverage are incomplete."
+      ],
+      "disposition": {
+        "status": "legacy-published",
+        "reviewer": "Existing published bundle",
+        "reason": "Preserve the baseline review grade without promoting historical accuracy.",
+        "conflicts": []
+      }
+    },
+    {
+      "id": "canada-2010",
+      "polityId": "canada",
+      "featureId": "canada",
+      "file": "snapshot-2010.geojson",
+      "sourceIds": [
+        "historical-basemaps"
+      ],
+      "inputs": [
+        {
+          "url": "https://raw.githubusercontent.com/aourednik/historical-basemaps/master/geojson/world_2010.geojson",
+          "sha256": "d18dcbe41df5e68ec174e5f3887578142bf70fba72f56e204c9de5a8571ae0f4"
+        }
+      ],
+      "regions": [
+        "north-america",
+        "canada-newfoundland"
+      ],
+      "coverage": "partial",
+      "representation": "source-political",
+      "time": {
+        "kind": "snapshot",
+        "year": 2010,
+        "precision": "year"
+      },
+      "precision": "generalized",
+      "review": "source-snapshot",
+      "evidenceIds": [],
+      "limitations": [
+        "Generalized source snapshot; independent historical boundary validation and local dispute coverage are incomplete."
+      ],
+      "disposition": {
+        "status": "legacy-published",
+        "reviewer": "Existing published bundle",
+        "reason": "Preserve the baseline review grade without promoting historical accuracy.",
+        "conflicts": []
+      }
+    },
+    {
+      "id": "canada-1949",
+      "polityId": "canada",
+      "featureId": "canada",
+      "file": "snapshot-1949.geojson",
+      "sourceIds": [
+        "nrcan"
+      ],
+      "inputs": [
+        {
+          "url": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/territorial_evolution_en/MapServer/8/query?where=START_TIME%3D1949&outFields=PROV_NAME,START_TIME,END_TIME,Period_Group&outSR=4326&maxAllowableOffset=0&f=geojson",
+          "sha256": "24aca59a2894b0e080ae79f7c790d1137dc95b99ce17c7b963bb046dcfb167ec"
+        }
+      ],
+      "regions": [
+        "north-america",
+        "canada-newfoundland"
+      ],
+      "coverage": "partial",
+      "representation": "legal-affiliation",
+      "time": {
+        "kind": "snapshot",
+        "year": 1949,
+        "precision": "year"
+      },
+      "precision": "generalized",
+      "review": "official-source",
+      "evidenceIds": [
+        "newfoundland-union-date",
+        "newfoundland-union-legal",
+        "canada-1949-source-scope"
+      ],
+      "limitations": [
+        "Annual source depicts Canada after Newfoundland’s entry; the March 31 event does not establish day-valid geometry or an interval.",
+        "US and Mexico geometry for 1949 is unavailable. Nearby-island, Indigenous and disputed-boundary coverage remains incomplete.",
+        "Official generalized reference geometry, not independent historical boundary validation or effective-control evidence.",
+        "Unsimplified official divisions dissolved, then Douglas–Peucker simplification starting at 0.03 degrees with finer or unsimplified fallback until topology normalization preserves every component, hole and ring boundary. Selected tolerance: 0.01 degrees; source boundary points are retained. Government of Canada does not endorse this application."
+      ],
+      "disposition": {
+        "status": "approved-reference",
+        "reviewer": "Codex, under Nicolas's bounded reference-review authorization",
+        "reason": "Approve the official generalized annual post-entry reference only. NRCan attribution/license and 1949 grouping, legal membership/1927 extent, interior ownership checks, ring validation, dissolution and visual review support this limited grade. Independent historical boundary validation, effective control and exact-day geometry remain unverified. Topology review found and corrected simplification-induced component connections. The revised 0.01-degree output preserves all 1,044 components and is unchanged under canonical self-union normalization.",
+        "conflicts": []
+      }
+    }
+  ],
+  "evidence": [
+    {
+      "id": "newfoundland-union-date",
+      "sourceId": "newfoundland-check",
+      "assertion": "Newfoundland entered Confederation on 31 March 1949.",
+      "text": "Newfoundland entered Confederation on 31 March 1949.",
+      "sha256": "ee373f21077eefb68443e0758fc154ab0557d2d9019647132e65dbf05a744321",
+      "sourcePageSha256": "0a2a15bb1b24b285ddde9dbe868f9ef3f0b574888505e5ae08ce9bc041f5e547"
+    },
+    {
+      "id": "newfoundland-union-legal",
+      "sourceId": "newfoundland-union-act",
+      "assertion": "The Terms of Union establish Newfoundland as a Canadian province from the date of Union.",
+      "text": "Newfoundland shall form part of Canada and shall be a province thereof.",
+      "sha256": "472726d03d2f0e91c632f35f614bf78959931f040e4ba58eaa07273f475b7226",
+      "sourcePageSha256": "37d43715ea1a5f32f94275eeb70507d8900b75c7578bab950f1b29632cfc0365"
+    },
+    {
+      "id": "canada-1949-source-scope",
+      "sourceId": "nrcan",
+      "assertion": "The annual layer assigns Newfoundland to Canada (1949).",
+      "text": "PROV_NAME=Newfoundland; START_TIME=1949; END_TIME=1949; Period_Group=Canada (1949)",
+      "sha256": "c10f931016d8919166ce75d85e53efd3e8dce93ab1629395e0dffe023b67dc9a",
+      "sourcePageSha256": "24aca59a2894b0e080ae79f7c790d1137dc95b99ce17c7b963bb046dcfb167ec"
+    }
+  ],
+  "events": [
+    {
+      "id": "newfoundland-union-1949",
+      "name": "Newfoundland’s entry into Canada",
+      "kind": "legal-union",
+      "date": {
+        "year": 1949,
+        "month": 3,
+        "day": 31
+      },
+      "precision": "day",
+      "polityIds": [
+        "newfoundland",
+        "canada"
+      ],
+      "beforeStateIds": [
+        "newfoundland-1938"
+      ],
+      "afterStateIds": [
+        "canada-1949"
+      ],
+      "evidenceIds": [
+        "newfoundland-union-date",
+        "newfoundland-union-legal"
+      ],
+      "limitations": [
+        "Before/after references are sparse annual snapshots, not exact-day boundary geometry."
+      ]
+    }
+  ],
+  "revision": "1cfbbed2dbdc5ad60613da74c4a274eb003ababc11813bd21389204264048e0b",
+  "assetDigests": {
+    "snapshot-1880.geojson": "55513b2ec2be8dd012a5e603236337f4c9d952a29471bf4559254ddb3d0f8eec",
+    "snapshot-1938.geojson": "a97572cd81a5f6239c6adfc075cfc2317f727e1738776128a6e1c9f6557efbe6",
+    "snapshot-1949.geojson": "c0b406d8328d53c0fdebf54a0811c6a3d01ebed9b9d98a50bda9dad9852ec4ac",
+    "snapshot-1960.geojson": "b20f2460c164262a2ed8ac5eba55784ae4d162da1836bc8a91da10232f54286e",
+    "snapshot-2010.geojson": "029754b4e66bd857a677a681c80be127670558f0bdee3681be1756ec243f8b33",
+    "land.geojson": "74e32d31a1f9531a8531d9f5d7bf1b29c4ec94f87a006639e998e01be14f9156"
+  }
 }

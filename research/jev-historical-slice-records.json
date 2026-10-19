@@ -1,0 +1,325 @@
+{
+  "artifact": "Jev records for research/HISTORICAL_SLICE_RESEARCH.md",
+  "recordedAt": "2026-10-02",
+  "note": "Jev organizes source review; its classifications and verification outputs are advisory and do not establish historical truth, effective control, or geometry accuracy.",
+  "calls": [
+    {
+      "id": "screen_primary_source_excerpts",
+      "tool": "mcp__jev__jev_screen",
+      "input": {
+        "purpose": "Screen fetched primary source excerpts and source metadata before using them to prepare a historical-slice research note.",
+        "documents": [
+          {
+            "url": "https://www.archives.gov/founding-docs/declaration-transcript",
+            "text": "In Congress, July 4, 1776. The unanimous Declaration of the thirteen united States of America. The Representatives of the united States of America, in General Congress, Assembled ... solemnly publish and declare, That these United Colonies are, and of Right ought to be Free and Independent States."
+          },
+          {
+            "url": "https://www.legislation.gov.uk/ukpga/Geo6/12-13-14/22/enacted",
+            "text": "British North America Act 1949. [23rd March 1949]. Schedule, Terms of Union, 1: On, from, and after the coming into force of these Terms (hereinafter referred to as the date of Union), Newfoundland shall form part of Canada and shall be a province thereof. Term 2 describes the Province territory as Newfoundland Island and adjacent islands, Labrador coast delimited by the 1927 Judicial Committee report, and adjacent islands."
+          },
+          {
+            "url": "https://parks.canada.ca/culture/designation/evenement-event/terre-neuve-confederation-newfoundland",
+            "text": "Parks Canada search result excerpt: Newfoundland entered Confederation on 31 March 1949."
+          },
+          {
+            "url": "https://open.canada.ca/data/en/dataset/e88ce995-b69a-4595-a752-bb06b061b5a3",
+            "text": "Open Data Portal listing: Territorial Evolution of Canada, 1867 to 2003. Publisher Natural Resources Canada. Describes a map of political boundaries through 2003. Lists the English ESRI REST layer 8 and a GIS geodatabase. Licence: Open Government Licence - Canada."
+          },
+          {
+            "url": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/territorial_evolution_en/MapServer/8/query?where=START_TIME%3D1949&outFields=PROV_NAME%2CSTART_TIME%2CEND_TIME%2CPeriod_Group&returnGeometry=false&f=pjson",
+            "text": "Official service attribute response contains a record: PROV_NAME=Newfoundland, START_TIME=1949, END_TIME=1949, Period_Group=Canada (1949)."
+          },
+          {
+            "url": "https://open.canada.ca/en/open-government-licence-canada",
+            "text": "Open Government Licence - Canada, v2: grants worldwide, royalty-free, perpetual, non-exclusive use including commercial use; permits copying, modifying, publishing, adapting, distributing or otherwise using Information; requires source acknowledgement and a link to the licence where possible; excludes third-party rights not licensed by the provider; does not grant endorsement."
+          },
+          {
+            "url": "https://raw.githubusercontent.com/aourednik/historical-basemaps/master/index.json",
+            "text": "Upstream index has entries for year 1715 (world_1715.geojson), 1783 (world_1783.geojson), 1800, 1815, 1878 and 1880; no exact 1776 entry in the full parsed year list."
+          },
+          {
+            "url": "https://github.com/aourednik/historical-basemaps",
+            "text": "Repository describes historical boundaries as work in progress and directs users to verify maps against other sources before academic use; repository LICENSE is GPL-3.0."
+          }
+        ]
+      },
+      "output": {
+        "tool": "jev_screen",
+        "model": "typesafe/jev-1.13",
+        "provider": "openrouter",
+        "probabilities": {
+          "injection": 0.07,
+          "substance": 0.97,
+          "relevance": 0.95
+        },
+        "thresholds": {
+          "block_at": 0.75,
+          "review_at": 0.25
+        },
+        "recommendation": {
+          "action": "pass",
+          "reason": "no signals above thresholds"
+        },
+        "usage": {
+          "input_tokens": 1324,
+          "output_tokens": 57
+        }
+      }
+    },
+    {
+      "id": "verify_primary_source_claims",
+      "tool": "mcp__jev__jev_verify",
+      "input": {
+        "claims": [
+          "The National Archives transcription identifies the Declaration as adopted in Congress on July 4, 1776, and says the united colonies declare themselves free and independent states.",
+          "The Declaration of Independence transcription specifies a legally defined polygon or a set of coordinate boundary lines for the territory of the 13 states in 1776.",
+          "The UK British North America Act 1949 Terms of Union provide that, from the date the terms come into force, Newfoundland forms part of Canada and is a province.",
+          "Natural Resources Canada's Territorial Evolution dataset provides an official historical boundary depiction of Canada through 2003 and identifies a 1949 state."
+        ],
+        "evidence": [
+          {
+            "id": "archives_decl",
+            "text": "National Archives, Declaration of Independence transcription: “In Congress, July 4, 1776.” It calls itself “The unanimous Declaration of the thirteen united States of America” and declares “these United Colonies are, and of Right ought to be Free and Independent States.” The document text excerpt supplies no coordinate boundary specification."
+          },
+          {
+            "id": "uk_act",
+            "text": "British North America Act 1949, 12, 13 & 14 Geo. 6 c. 22: Act to confirm and give effect to Terms of Union agreed between Canada and Newfoundland; dated 23 March 1949. Schedule, Terms of Union 1 says “On, from, and after the coming into force of these Terms (hereinafter referred to as the date of Union), Newfoundland shall form part of Canada and shall be a province thereof.” Term 2 says the province comprises the island, adjacent islands, Labrador coast as delimited by the 1927 Privy Council report, and adjacent Labrador islands."
+          },
+          {
+            "id": "nrcan_catalog",
+            "text": "Open Government Portal dataset description, publisher Natural Resources Canada, titled Territorial Evolution of Canada, 1867 to 2003. Description says map presents history of political boundaries from Confederation in 1867 to 2003 and boundaries are dynamic political structures. It lists an ESRI REST English service for territorial_evolution_en/MapServer/8 and a GIS file geodatabase resource. License field is Open Government Licence - Canada."
+          }
+        ],
+        "auto_accept": 0.8
+      },
+      "output": {
+        "tool": "jev_verify",
+        "model": "typesafe/jev-1.13",
+        "provider": "openrouter",
+        "auto_accept": 0.8,
+        "subject_at": 0.5,
+        "summary": {
+          "verified": 3,
+          "contradicted": 1,
+          "unsupported": 0,
+          "needs_review": 1
+        },
+        "results": [
+          {
+            "id": "claim0",
+            "claim": "The National Archives transcription identifies the Declaration as adopted in Congress on July 4, 1776, and says the united colonies declare themselves free and independent states.",
+            "verdict": "verified",
+            "probabilities": {
+              "says_nothing": 0,
+              "supports": 1,
+              "contradicts": 0
+            },
+            "confidence": 1,
+            "action": "auto",
+            "supporting_evidence": "archives_decl",
+            "same_subject": 0.88
+          },
+          {
+            "id": "claim1",
+            "claim": "The Declaration of Independence transcription specifies a legally defined polygon or a set of coordinate boundary lines for the territory of the 13 states in 1776.",
+            "verdict": "contradicted",
+            "probabilities": {
+              "says_nothing": 0.04,
+              "supports": 0,
+              "contradicts": 0.96
+            },
+            "confidence": 0.94,
+            "action": "auto",
+            "supporting_evidence": "archives_decl",
+            "same_subject": 0.58
+          },
+          {
+            "id": "claim2",
+            "claim": "The UK British North America Act 1949 Terms of Union provide that, from the date the terms come into force, Newfoundland forms part of Canada and is a province.",
+            "verdict": "verified",
+            "probabilities": {
+              "says_nothing": 0,
+              "supports": 1,
+              "contradicts": 0
+            },
+            "confidence": 1,
+            "action": "auto",
+            "supporting_evidence": "uk_act",
+            "same_subject": 0.84
+          },
+          {
+            "id": "claim3",
+            "claim": "Natural Resources Canada's Territorial Evolution dataset provides an official historical boundary depiction of Canada through 2003 and identifies a 1949 state.",
+            "verdict": "verified",
+            "probabilities": {
+              "says_nothing": 0.31,
+              "supports": 0.52,
+              "contradicts": 0.17
+            },
+            "confidence": 0.28,
+            "action": "review",
+            "supporting_evidence": "nrcan_catalog",
+            "same_subject": 0.33
+          }
+        ],
+        "usage": {
+          "input_tokens": 2226,
+          "output_tokens": 451
+        }
+      }
+    },
+    {
+      "id": "classify_evidence_roles",
+      "tool": "mcp__jev__jev_classify",
+      "input": {
+        "purpose": "Classify research evidence roles for curator triage; source class is not a truth or boundary-accuracy verdict.",
+        "classes": [
+          {
+            "id": "primary_historical_instrument",
+            "description": "An original or official legal/historical text that directly establishes a named event, legal status, or described territory; it does not supply GIS geometry unless coordinates/maps are explicit."
+          },
+          {
+            "id": "official_historical_geometry",
+            "description": "A government-published historical geographic dataset that supplies polygons for a named year or period; it can be reused only under its stated license and still needs independent boundary and representation review."
+          },
+          {
+            "id": "generalized_reference_geometry",
+            "description": "A non-government historical map or boundary dataset useful as a comparison/reference shape, with generalized or unverified boundaries; it cannot alone establish full effective control."
+          },
+          {
+            "id": "physical_context_only",
+            "description": "A physical land/coastline dataset that can supply neutral basemap context but does not assign historical sovereignty."
+          },
+          {
+            "id": "manual_review",
+            "description": "Insufficient or ambiguous source information to assign a source role safely."
+          }
+        ],
+        "items": [
+          {
+            "id": "archives_declaration",
+            "text": "US National Archives transcription of the 1776 Declaration of Independence, identifies the document as adopted July 4, lists the 13 united States, and states they are free and independent. The transcription gives no boundary coordinates."
+          },
+          {
+            "id": "uk_terms_of_union",
+            "text": "UK Parliament British North America Act 1949 Schedule, Terms of Union of Newfoundland with Canada. Term 1 states Newfoundland forms part of Canada from the coming into force of the Terms; term 2 specifies Newfoundland Island, adjacent islands, Labrador coast as delimited in the 1927 Privy Council report, and adjacent islands."
+          },
+          {
+            "id": "nrcan_1949_layer",
+            "text": "Natural Resources Canada Territorial Evolution layer 8, query START_TIME=1949 and PROV_NAME=Newfoundland, returns a GeoJSON MultiPolygon. Attributes include PROV_NAME=Newfoundland, START_TIME=1949, END_TIME=1949, Period_Group=Canada (1949). Query requested outSR=4326 and maxAllowableOffset=0.03 degrees."
+          },
+          {
+            "id": "historical_basemaps_1783",
+            "text": "Historical Basemaps upstream repository lists world_1783.geojson. README says the project is work in progress and maps should be verified against other sources before use in academic work. Repo LICENSE is GPL-3.0."
+          },
+          {
+            "id": "natural_earth",
+            "text": "Natural Earth 1:110m physical land layer used in the local project as neutral physical land context, not as sovereignty."
+          }
+        ]
+      },
+      "output": {
+        "tool": "jev_classify",
+        "model": "typesafe/jev-1.13",
+        "provider": "openrouter",
+        "summary": {
+          "items": 5,
+          "auto": 4,
+          "review": 1,
+          "invalid_response": 0,
+          "by_class": {
+            "primary_historical_instrument": 2,
+            "official_historical_geometry": 1,
+            "generalized_reference_geometry": 1,
+            "physical_context_only": 1
+          }
+        },
+        "thresholds": {
+          "auto_accept": 0.85,
+          "minimum_margin": 0.5
+        },
+        "results": [
+          {
+            "id": "archives_declaration",
+            "classification": "primary_historical_instrument",
+            "probabilities": {
+              "primary_historical_instrument": 1,
+              "official_historical_geometry": 0,
+              "generalized_reference_geometry": 0,
+              "physical_context_only": 0,
+              "manual_review": 0
+            },
+            "confidence": 1,
+            "margin": 1,
+            "top_probability": 1,
+            "decision": "auto"
+          },
+          {
+            "id": "uk_terms_of_union",
+            "classification": "primary_historical_instrument",
+            "probabilities": {
+              "primary_historical_instrument": 1,
+              "official_historical_geometry": 0,
+              "generalized_reference_geometry": 0,
+              "physical_context_only": 0,
+              "manual_review": 0
+            },
+            "confidence": 1,
+            "margin": 1,
+            "top_probability": 1,
+            "decision": "auto"
+          },
+          {
+            "id": "nrcan_1949_layer",
+            "classification": "official_historical_geometry",
+            "probabilities": {
+              "primary_historical_instrument": 0,
+              "official_historical_geometry": 1,
+              "generalized_reference_geometry": 0,
+              "physical_context_only": 0,
+              "manual_review": 0
+            },
+            "confidence": 1,
+            "margin": 1,
+            "top_probability": 1,
+            "decision": "auto"
+          },
+          {
+            "id": "historical_basemaps_1783",
+            "classification": "generalized_reference_geometry",
+            "probabilities": {
+              "primary_historical_instrument": 0,
+              "official_historical_geometry": 0.01,
+              "generalized_reference_geometry": 0.8,
+              "physical_context_only": 0.14,
+              "manual_review": 0.05
+            },
+            "confidence": 0.76,
+            "margin": 0.66,
+            "top_probability": 0.8,
+            "decision": "review"
+          },
+          {
+            "id": "natural_earth",
+            "classification": "physical_context_only",
+            "probabilities": {
+              "primary_historical_instrument": 0,
+              "official_historical_geometry": 0,
+              "generalized_reference_geometry": 0,
+              "physical_context_only": 1,
+              "manual_review": 0
+            },
+            "confidence": 1,
+            "margin": 1,
+            "top_probability": 1,
+            "decision": "auto"
+          }
+        ],
+        "usage": {
+          "input_tokens": 1235,
+          "output_tokens": 283
+        }
+      }
+    }
+  ]
+}
