@@ -1,0 +1,37 @@
+{
+  "id": "1776",
+  "status": "blocked-no-eligible-geometry",
+  "reviewer": "Codex, recording owner-authorized explicit 1776 gap",
+  "authority": "Owner authorized an explicit 1776 gap and neutral physical land until eligible historical geometry is sourced and separately reviewed. This record documents source blockers; it is not an approval of geometry.",
+  "reviewedOn": "2026-10-03",
+  "representation": "gap",
+  "reason": "No eligible 1776 boundary geometry exists. The National Archives Declaration of Independence (July 4, 1776) asserts independence of the thirteen united States but supplies no coordinate polygons and does not establish agreed boundaries or effective control. Historical Basemaps has no 1776 entry; its 1715 and 1783 snapshots cannot be backcast, and 1783 is excluded by a demonstrated Jacksonville ownership error. 1776 therefore remains a visible gap with neutral physical land. Neither the Declaration, 1715 nor 1783 may be presented as an effective-control boundary for 1776.",
+  "evidence": [
+    "declaration-of-independence-transcript",
+    "historical-basemaps-index",
+    "historical-slice-research"
+  ],
+  "judgmentRecords": [
+    "research/jev-historical-slice-records.json"
+  ],
+  "transformation": "None. No geometry is imported, digitized, interpolated or backcast for 1776. Neutral physical land from Natural Earth remains the only rendered context.",
+  "conflicts": [
+    "No licensed primary historical geometry or defensible historical-map digitization has been identified for a bounded 1776 state.",
+    "Claim/legal/control representation, date precision, coverage and source-coordinate support remain unresolved pending historical/cartographic curator review.",
+    "Indigenous and unknown-region limitations are not yet specified for any candidate 1776 representation."
+  ],
+  "publicationSha256": null,
+  "outputSha256": null,
+  "sourceBlockers": [
+    "No 1776 entry in Historical Basemaps; direct 1775/1776 GeoJSON paths return 404.",
+    "Historical Basemaps 1783 map cannot be used as a 1776 state or interpolated to one; repo excludes 1783 over Jacksonville ownership error.",
+    "Declaration of Independence supplies no boundary coordinates or polygons.",
+    "No defensible historical-map digitization proposal or licensed primary geometry has been approved."
+  ],
+  "requiredBeforePublication": [
+    "Identify actual historical geometry/map evidence, provenance and redistribution terms, or record specific source blockers.",
+    "Resolve supported representation, geography and temporal precision with a historical/cartographic curator; text dates alone do not establish coordinates or effective control.",
+    "Propose an independently reviewable import/digitization and validation plan, including Indigenous/unknown region limitations.",
+    "Publication as a separately reviewed change; 1776 remains a gap until eligible geometry exists."
+  ]
+}
