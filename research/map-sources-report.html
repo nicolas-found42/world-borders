@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Historical Map Sources — Interactive Report</title>
+<style>
+:root{--bg:#0b0f14;--panel:#121820;--border:#1f2a37;--fg:#e6edf3;--muted:#8b949e;--accent:#58a6ff;--warn:#d29922;--err:#f85149;--ok:#3fb950}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--fg)}
+header{padding:20px 24px;border-bottom:1px solid var(--border)}
+h1{margin:0;font-size:20px}
+.sub{color:var(--muted);font-size:13px;margin-top:4px}
+main{display:grid;grid-template-columns:320px 1fr;gap:16px;padding:16px}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px}
+.filters label{display:block;font-size:12px;color:var(--muted);margin:10px 0 4px}
+.filters input,.filters select{width:100%;padding:6px 8px;background:#0d1117;border:1px solid var(--border);color:var(--fg);border-radius:6px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chip{padding:4px 10px;border:1px solid var(--border);border-radius:999px;font-size:12px;cursor:pointer;background:#0d1117}
+.chip.active{border-color:var(--accent);color:var(--accent)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.stat{background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:10px}
+.stat .v{font-size:22px;font-weight:600}
+.stat .l{font-size:11px;color:var(--muted)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}
+th{color:var(--muted);font-weight:600;cursor:pointer;user-select:none}
+tr:hover{background:#0d1117}
+.badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px}
+.ok{background:#162d1f;color:var(--ok)}
+.warn{background:#2d2208;color:var(--warn)}
+.err{background:#2d1215;color:var(--err)}
+.barwrap{height:10px;background:#0d1117;border-radius:5px;overflow:hidden;margin-top:4px}
+.bar{height:100%;background:var(--accent)}
+.detail{margin-top:12px}
+.detail h3{margin:0 0 6px;font-size:14px}
+.detail p{color:var(--muted);font-size:13px;line-height:1.5}
+.years{display:flex;flex-wrap:wrap;gap:3px;margin-top:6px}
+.year{font-size:10px;padding:1px 5px;border-radius:3px;background:#0d1117;border:1px solid var(--border)}
+.year.have{background:#162d1f;border-color:var(--ok);color:var(--ok)}
+svg text{fill:var(--fg);font-size:11px}
+</style>
+</head>
+<body>
+<header>
+<h1>Historical Map Sources — Decision Report</h1>
+<div class="sub">Interactive comparison of candidate geometry sources for world-borders (range 1776–2026). Jev judgments advisory only. Click headers to sort. Filter by license/coverage.</div>
+</header>
+<main>
+<aside class="panel filters">
+<div class="stats">
+<div class="stat"><div class="v" id="nsrc">0</div><div class="l">sources</div></div>
+<div class="stat"><div class="v" id="nfull">0</div><div class="l">full-range</div></div>
+<div class="stat"><div class="v" id="nlic">0</div><div class="l">redistributable</div></div>
+</div>
+<label>Search</label>
+<input id="q" placeholder="name, note..."/>
+<label>License class</label>
+<select id="lic"><option value="">all</option><option value="open">open/redistributable</option><option value="restricted">restricted/unknown</option></select>
+<label>Min years in range</label>
+<input id="miny" type="number" value="0" min="0" max="251"/>
+<label>Representation</label>
+<select id="rep"><option value="">all</option><option value="effective">effective control</option><option value="claim">claim</option><option value="snapshot">snapshot</option></select>
+<div class="chips" id="chips"></div>
+</aside>
+<section class="panel">
+<table id="tbl">
+<thead><tr>
+<th data-k="name">Source</th>
+<th data-k="license">License</th>
+<th data-k="years">Years in range</th>
+<th data-k="coverage">Coverage</th>
+<th data-k="geom">Geometry</th>
+<th data-k="jev">Jev score</th>
+</tr></thead>
+<tbody></tbody>
+</table>
+<div class="detail" id="detail"></div>
+<svg id="chart" width="100%" height="220"></svg>
+</section>
+</main>
+<script>
+const DATA=[
+ {name:"aourednik/historical-basemaps",license:"GPL-3.0",licClass:"open",years:[1783,1800,1815,1878,1880,1900,1914,1920,1930,1938,1945,1960,1994,2000,2010],coverage:"world",geom:"generalized polygons",rep:"snapshot",jev:0.72,note:"Primary existing source. Work in progress; verify against other sources. No 1776 entry; 1775/1776 paths 404. GPL-3.0 copyleft.",url:"https://github.com/aourednik/historical-basemaps"},
+ {name:"NRCan Territorial Evolution",license:"OGL-Canada",licClass:"open",years:[1867,1870,1871,1873,1876,1880,1882,1889,1898,1901,1905,1912,1920,1927,1939,1943,1947,1949,1951,1953,1960,1962,1967,1968,1970,1971,1973,1976,1981,1992,1993,1999,2000,2001,2003],coverage:"Canada only",geom:"official generalized",rep:"effective",jev:0.85,note:"Canada only. Used for 1949 Newfoundland. Requires attribution + licence link + non-endorsement. Generalized, not survey-grade."},
+ {name:"Natural Earth (ne_10m/50m/110m)",license:"Public domain",licClass:"open",years:[2024],coverage:"world (modern)",geom:"high-res polygons",rep:"effective",jev:0.6,note:"Modern boundaries only (~2024). No historical years. Useful as land/geometry baseline and topology validation, not historical states."},
+ {name:"GADM",license:"GADM license (non-commercial-ish)",licClass:"restricted",years:[2022],coverage:"world (admin)",geom:"admin boundaries",rep:"effective",jev:0.4,note:"Modern admin divisions. License restricts redistribution/commercial use; not suitable for open bundle. No historical years."},
+ {name:"geoBoundaries",license:"CC BY 4.0 / ODbL",licClass:"open",years:[2020],coverage:"world (admin)",geom:"admin boundaries",rep:"effective",jev:0.55,note:"Modern admin boundaries with open licenses. No historical series. Could serve as modern 2020s snapshot anchor."},
+ {name:"CShapes (PRIO)",license:"CC BY 4.0",licClass:"open",years:[1946,1947,1948,1949,1950,1955,1960,1965,1970,1975,1980,1985,1990,1995,2000,2005,2010,2015,2016,2019],coverage:"world (state system)",geom:"state polygons (coarse)",rep:"effective",jev:0.78,note:"State system membership & territory, 1946+. Coarse geometry; good for country existence/changes but not precise borders. Could fill 1946-2019 gaps at state level."},
+ {name:"PRIO-GRID",license:"CC BY 4.0",licClass:"open",years:[1946,2014],coverage:"world grid",geom:"grid cells",rep:"snapshot",jev:0.35,note:"Grid-based, not country polygons. Not suitable for border geometry."},
+ {name:"World Historical Gazetteer",license:"CC0/ODbL",licClass:"open",years:[-3000,1900,2000],coverage:"places/events",geom:"points",rep:"claim",jev:0.45,note:"Places & attestations, not continuous borders. Useful for event dates/citations, not geometry."},
+ {name:"Maddison / V-Dem (tabular)",license:"various open",licClass:"open",years:[1800,2023],coverage:"country-year panel",geom:"none",rep:"snapshot",jev:0.3,note:"No geometry. Useful for country lists/years only."},
+ {name:"IIASA GAEZ/SSP boundaries",license:"CC BY 4.0",licClass:"open",years:[2000,2010,2020],coverage:"world",geom:"admin",rep:"effective",jev:0.4,note:"Climate/admin boundaries; modern only."},
+ {name:"UN Cartographic Section",license:"UN terms (restricted)",licClass:"restricted",years:[2024],coverage:"world",geom:"reference",rep:"effective",jev:0.35,note:"Reference maps; redistribution restricted. Not bundle-friendly."},
+ {name:"OpenStreetMap / Overpass",license:"ODbL",licClass:"open",years:[2024],coverage:"world",geom:"detailed",rep:"effective",jev:0.5,note:"Current borders only (no history). High detail; heavy. Could anchor modern 2026 snapshot."},
+];
+let sortK="jev",sortDir=-1,filter={};
+const $=s=>document.querySelector(s);
+function inRange(y){return y>=1776&&y<=2026}
+function yearsInRange(d){return d.years.filter(inRange)}
+function render(){
+ const q=$("input#q").value.toLowerCase();
+ const lic=$("select#lic").value;
+ const miny=+($("input#miny").value||0);
+ const rep=$("select#rep").value;
+ let rows=DATA.filter(d=>{
+   if(q && !(d.name+d.note).toLowerCase().includes(q)) return false;
+   if(lic && d.licClass!==lic) return false;
+   if(yearsInRange(d).length<miny) return false;
+   if(rep && d.rep!==rep) return false;
+   return true;
+ });
+ rows.sort((a,b)=>{let va=a[sortK],vb=b[sortK]; if(Array.isArray(va)) va=va.length; if(Array.isArray(vb)) vb=vb.length; if(va<vb) return sortDir; if(va>vb) return -sortDir; return 0;});
+ const tb=$("tbody"); tb.innerHTML="";
+ rows.forEach(d=>{
+   const tr=document.createElement("tr");
+   tr.innerHTML=`<td><strong>${d.name}</strong><br><span style="color:var(--muted);font-size:11px">${d.note.slice(0,60)}…</span></td>
+     <td><span class="badge ${d.licClass==='open'?'ok':'warn'}">${d.license}</span></td>
+     <td>${yearsInRange(d).length}<div class="barwrap"><div class="bar" style="width:${(yearsInRange(d).length/251*100).toFixed(1)}%"></div></div></td>
+     <td>${d.coverage}</td>
+     <td>${d.geom}</td>
+     <td>${d.jev.toFixed(2)}</td>`;
+   tr.onclick=()=>showDetail(d);
+   tb.appendChild(tr);
+ });
+ $("span#nsrc").textContent=DATA.length;
+ $("span#nfull").textContent=DATA.filter(d=>yearsInRange(d).length>=200).length;
+ $("span#nlic").textContent=DATA.filter(d=>d.licClass==='open').length;
+ drawChart(rows);
+}
+function showDetail(d){
+ const el=$("div#detail");
+ const ys=yearsInRange(d);
+ el.innerHTML=`<h3>${d.name}</h3><p>${d.note}</p>
+ <p><strong>URL:</strong> ${d.url||'n/a'} · <strong>Rep:</strong> ${d.rep} · <strong>Jev score:</strong> ${d.jev}</p>
+ <div class="years">${ys.map(y=>`<span class="year have">${y}</span>`).join("")}</div>
+ ${ys.length===0?'<p style="color:var(--err)">No years in 1776–2026 range.</p>':''}`;
+}
+function drawChart(rows){
+ const svg=$("svg#chart"); svg.innerHTML="";
+ const W=svg.clientWidth||800, H=220, pad=30;
+ const max=251;
+ rows.forEach((d,i)=>{
+   const y=pad+i*14;
+   if(y>H-10) return;
+   const w=(yearsInRange(d).length/max)*(W-120);
+   const t=document.createElementNS("http://www.w3.org/2000/svg","text");
+   t.setAttribute("x",0); t.setAttribute("y",y+9); t.textContent=d.name.slice(0,22); svg.appendChild(t);
+   const r=document.createElementNS("http://www.w3.org/2000/svg","rect");
+   r.setAttribute("x",130); r.setAttribute("y",y); r.setAttribute("width",w); r.setAttribute("height",10); r.setAttribute("fill","var(--accent)"); r.setAttribute("rx",3); svg.appendChild(r);
+   const t2=document.createElementNS("http://www.w3.org/2000/svg","text");
+   t2.setAttribute("x",135+w); t2.setAttribute("y",y+9); t2.textContent=yearsInRange(d).length; svg.appendChild(t2);
+ });
+}
+document.querySelectorAll("th").forEach(th=>th.addEventListener("click",()=>{const k=th.dataset.k; if(sortK===k) sortDir*=-1; else {sortK=k;sortDir=-1;} render();}));
+["q","lic","miny","rep"].forEach(id=>$( (id==="q"||id==="miny")?"#"+id:"select#"+id).addEventListener("input",render));
+render();
+</script>
+</body>
+</html>
